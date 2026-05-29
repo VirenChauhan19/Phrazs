@@ -168,34 +168,47 @@
           </form>
         </div>
         <div class="admin-dashboard" id="adminDashboard" hidden>
-          <div class="admin-topbar">
-            <div>
-              <p class="eyebrow">Admin</p>
-              <h2>Phrazs Admin Console</h2>
+          <div class="wp-adminbar">
+            <div class="wp-adminbar__start">
+              <span class="wp-logo">W</span>
+              <strong>Phrazs</strong>
+              <span>Dashboard</span>
+              <span>+ New</span>
             </div>
-            <div class="admin-actions">
-              <button class="ghost-button" id="downloadData" type="button">Export JSON</button>
-              <button class="ghost-button" id="lockAdmin" type="button">Lock</button>
+            <div class="wp-adminbar__end">
+              <button id="downloadData" type="button">Export JSON</button>
+              <button id="lockAdmin" type="button">Log Out</button>
             </div>
           </div>
-          <div class="metric-grid" id="metricGrid"></div>
-          <div class="admin-tabs" role="tablist" aria-label="Admin data">
-            <button class="active" type="button" data-admin-tab="overview">Overview</button>
-            <button type="button" data-admin-tab="bookings">Bookings</button>
-            <button type="button" data-admin-tab="active">Active</button>
-            <button type="button" data-admin-tab="completed">Completed</button>
-            <button type="button" data-admin-tab="payments">Payments</button>
-            <button type="button" data-admin-tab="payouts">Payouts</button>
-            <button type="button" data-admin-tab="calendar">Calendar</button>
-            <button type="button" data-admin-tab="users">Users</button>
-            <button type="button" data-admin-tab="listings">Listings</button>
-            <button type="button" data-admin-tab="hosts">Hosts</button>
-            <button type="button" data-admin-tab="media">Media</button>
-            <button type="button" data-admin-tab="content">Content</button>
-            <button type="button" data-admin-tab="inquiries">Inquiries</button>
-            <button type="button" data-admin-tab="raw">Raw Data</button>
+          <div class="wp-admin-layout">
+            <aside class="wp-sidebar">
+              <div class="wp-sidebar__brand">Phrazs Admin</div>
+              <div class="admin-tabs" role="tablist" aria-label="Admin data">
+                <button class="active" type="button" data-admin-tab="overview"><span>Dashboard</span></button>
+                <button type="button" data-admin-tab="bookings"><span>Bookings</span></button>
+                <button type="button" data-admin-tab="active"><span>Active Bookings</span></button>
+                <button type="button" data-admin-tab="completed"><span>Completed</span></button>
+                <button type="button" data-admin-tab="payments"><span>Payments</span></button>
+                <button type="button" data-admin-tab="payouts"><span>Payouts</span></button>
+                <button type="button" data-admin-tab="calendar"><span>Calendar</span></button>
+                <button type="button" data-admin-tab="users"><span>Users</span></button>
+                <button type="button" data-admin-tab="listings"><span>Listings</span></button>
+                <button type="button" data-admin-tab="hosts"><span>Hosts</span></button>
+                <button type="button" data-admin-tab="media"><span>Media</span></button>
+                <button type="button" data-admin-tab="content"><span>Pages / Settings</span></button>
+                <button type="button" data-admin-tab="inquiries"><span>Inquiries</span></button>
+                <button type="button" data-admin-tab="raw"><span>Tools / Export</span></button>
+              </div>
+            </aside>
+            <div class="wp-content">
+              <div class="wp-content__header">
+                <h2>Dashboard</h2>
+                <button type="button">Screen Options</button>
+              </div>
+              <div class="metric-grid" id="metricGrid"></div>
+              <div class="admin-panel" id="adminPanel"></div>
+            </div>
           </div>
-          <div class="admin-panel" id="adminPanel"></div>
         </div>
       </section>
     </main>

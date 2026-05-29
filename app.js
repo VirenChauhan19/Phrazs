@@ -11,6 +11,23 @@ const state = {
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
 
+const adminTitles = {
+  overview: "Dashboard",
+  bookings: "Bookings",
+  active: "Active Bookings",
+  completed: "Completed Bookings",
+  payments: "Payments",
+  payouts: "Payouts",
+  calendar: "Calendar",
+  users: "Users",
+  listings: "Listings",
+  hosts: "Hosts",
+  media: "Media Library",
+  content: "Pages / Settings",
+  inquiries: "Inquiries",
+  raw: "Tools / Export"
+};
+
 function money(value) {
   return `$${Number(value || 0).toLocaleString()}`;
 }
@@ -191,6 +208,8 @@ function adminTable(items, columns) {
 
 function renderAdminPanel() {
   const panel = byId("adminPanel");
+  const heading = $(".wp-content__header h2");
+  if (heading) heading.textContent = adminTitles[state.adminTab] || "Dashboard";
   if (state.adminTab === "overview") {
     const upcoming = data.bookings.filter((item) => item.status !== "Completed");
     panel.innerHTML = `
