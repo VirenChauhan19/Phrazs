@@ -4,6 +4,13 @@ export default function Terms() {
   const { data } = useStore();
   const t = data.terms;
 
+  // HashRouter uses the URL hash for routing, so plain "#id" anchors would
+  // change the route. Scroll in-page instead, without touching the hash.
+  const scrollTo = (e, id) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <section className="section legal-page">
       <div className="section-heading">
@@ -20,9 +27,11 @@ export default function Terms() {
         <aside className="legal-toc">
           <p className="legal-toc__title">On this page</p>
           <nav aria-label="Terms sections">
-            <a href="#highlights">The short version</a>
+            <a href="#highlights" onClick={(e) => scrollTo(e, "highlights")}>
+              The short version
+            </a>
             {t.sections.map((s) => (
-              <a key={s.id} href={`#${s.id}`}>
+              <a key={s.id} href={`#${s.id}`} onClick={(e) => scrollTo(e, s.id)}>
                 {s.title}
               </a>
             ))}

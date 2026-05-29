@@ -442,7 +442,7 @@ export const PHRAZS_DATA = {
     { date: "2026-06-11", property: "Studio A | Big Mama's House at SparQ Social", status: "Blocked", bookingId: "", time: "Maintenance" },
   ],
   legal: {
-    termsUpdated: "12/22/24",
+    termsUpdated: "May 29, 2026",
     company: "Phrazs",
     jurisdiction: "Georgia, United States",
     payments: ["Visa", "Mastercard", "American Express", "Discover"],
@@ -498,6 +498,7 @@ export const PHRAZS_DATA = {
         paragraphs: [
           "Phrazs operates an online platform that lets people who own or control creative spaces (\"Hosts\") offer those spaces for short-term hourly or daily use, and lets people who want to use them (\"Guests\") discover and book them.",
           "Phrazs is not a party to the agreement between a Host and a Guest. We do not own, sell, resell, control, manage, inspect, or operate any listed space, and we are not a real-estate broker, insurer, or event organizer. When a booking is confirmed, a direct contract is formed between the Host and the Guest. Phrazs provides the technology, booking tools, and payment facilitation that make that contract possible.",
+          "Phrazs acts as an independent contractor. Nothing in these Terms creates any agency, partnership, joint venture, employment, or franchise relationship between you and Phrazs.",
         ],
       },
       {
@@ -506,6 +507,7 @@ export const PHRAZS_DATA = {
         paragraphs: [
           "You must be at least 18 years old and able to enter into a binding contract to use Phrazs. You agree to provide accurate, current information and to keep it up to date.",
           "You are responsible for activity that happens through your account and for keeping your login credentials secure. Tell us promptly at the contact email below if you believe your account has been compromised.",
+          "We may, but are not obligated to, verify the identity of users or the accuracy of listings. Any badge, review, or verification does not guarantee a person's identity or a space's safety, condition, or legality, so you are responsible for your own due diligence before booking or hosting.",
         ],
       },
       {
@@ -521,7 +523,8 @@ export const PHRAZS_DATA = {
         title: "4. Payments, Fees & Taxes",
         paragraphs: [
           "The Guest pays the space subtotal plus a 15% Phrazs service fee at checkout. The Host receives the subtotal minus a 15% commission, paid out after the booking begins (typically within two business days, subject to the payment processor).",
-          "Payments are collected and processed by our third-party payment partner; by booking you also agree to that processor's terms. All amounts are in U.S. dollars. You are responsible for any taxes that apply to your use of a space unless stated otherwise. Paying or accepting payment for a Phrazs booking outside the platform is prohibited and may lead to account suspension.",
+          "Phrazs collects payments from Guests as the Host's limited payment-collection agent; a Guest's payment to Phrazs satisfies the Guest's payment obligation to the Host. Payments are collected and processed by our third-party payment partner, and by booking you also agree to that processor's terms.",
+          "All amounts are in U.S. dollars. You are responsible for any taxes that apply to your use of, or earnings from, a space unless stated otherwise. Paying or accepting payment for a Phrazs booking outside the platform is prohibited and may lead to account suspension.",
         ],
       },
       {
@@ -536,8 +539,25 @@ export const PHRAZS_DATA = {
         ],
       },
       {
+        id: "damage",
+        title: "6. Damage, Security Deposits & Resolution",
+        paragraphs: [
+          "Spaces are offered for short-term creative use only. No tenancy, lease, or residential occupancy is created by a booking, and you have no right to remain in a space beyond your booked time.",
+          "A listing may require a refundable security deposit or a temporary authorization hold on the Guest's payment method. If a Guest (or its crew, guests, or invitees) causes damage beyond normal wear, leaves the space requiring excessive cleaning, or overstays, the Host may submit a claim with reasonable supporting evidence — such as photos, receipts, or repair estimates — within 14 days after the booking ends.",
+          "After reviewing the claim, Phrazs may charge the Guest's payment method for the substantiated amount and remit it to the Host. Phrazs's handling of a damage claim is a billing decision to facilitate the Host–Guest contract, not a legal determination of fault, and does not limit either party's other rights.",
+        ],
+      },
+      {
+        id: "insurance",
+        title: "7. Insurance & Assumption of Risk",
+        paragraphs: [
+          "Phrazs is not an insurer and does not provide insurance to Hosts or Guests. We strongly recommend that Guests carry appropriate production, general liability, and equipment insurance for their shoot or event, and that Hosts maintain property and liability coverage for their space.",
+          "You use any space, equipment, or amenity at your own risk. You are responsible for the safety of your crew, guests, and invitees, and for operating within the space's posted capacity, rules, and applicable safety and permitting laws.",
+        ],
+      },
+      {
         id: "guests",
-        title: "6. Guest Responsibilities",
+        title: "8. Guest Responsibilities",
         paragraphs: [
           "Treat every space with care and leave it in the condition you found it. You are responsible for your crew, guests, and invitees, and for any damage beyond normal wear during your booking. Hosts may seek reimbursement for damage, excessive cleaning, or overstays, which Phrazs may charge to your payment method.",
           "Follow all House Rules, occupancy and crew limits, check-in/out times, and applicable laws while using a space.",
@@ -545,7 +565,7 @@ export const PHRAZS_DATA = {
       },
       {
         id: "hosts",
-        title: "7. Host Responsibilities",
+        title: "9. Host Responsibilities",
         paragraphs: [
           "Hosts must have the right to list and offer their space, keep listings accurate (photos, location, amenities, rules, capacity, and availability), and provide the space in a safe, clean, and legal condition that matches the listing.",
           "Hosts are responsible for their own taxes, permits, insurance, and compliance with local laws, and must honor confirmed bookings. Hosts may not discriminate against Guests in violation of applicable law.",
@@ -553,15 +573,23 @@ export const PHRAZS_DATA = {
       },
       {
         id: "content",
-        title: "8. Your Content & Reviews",
+        title: "10. Your Content & Reviews",
         paragraphs: [
           "You retain ownership of the content you submit (listings, photos, messages, and reviews), and you grant Phrazs a non-exclusive, worldwide, royalty-free license to host, display, and promote that content in connection with operating the platform.",
           "Reviews must be honest and based on a genuine experience. We may remove content that is unlawful, deceptive, infringing, or that violates these Terms.",
         ],
       },
       {
+        id: "ip",
+        title: "11. Phrazs Intellectual Property",
+        paragraphs: [
+          "The Phrazs name, logo, and platform — including its software, design, text, and graphics (excluding user content) — are owned by Phrazs or its licensors and protected by intellectual-property laws. We grant you a limited, revocable, non-transferable license to access and use the platform for its intended purpose.",
+          "You may not copy, modify, distribute, sell, or create derivative works from the platform, or use Phrazs's trademarks or branding, without our prior written permission.",
+        ],
+      },
+      {
         id: "prohibited",
-        title: "9. Prohibited Conduct",
+        title: "12. Prohibited Conduct",
         paragraphs: ["You agree not to use Phrazs or any space to:"],
         list: [
           "break any law, infringe others' rights, or create safety hazards;",
@@ -574,37 +602,61 @@ export const PHRAZS_DATA = {
       },
       {
         id: "liability",
-        title: "10. Disclaimers & Limitation of Liability",
+        title: "13. Disclaimers & Limitation of Liability",
         paragraphs: [
           "The platform and all listings are provided \"as is\" and \"as available\" without warranties of any kind. Phrazs does not warrant the existence, quality, safety, or legality of any space, or the accuracy of any listing.",
           "To the maximum extent permitted by law, Phrazs is not liable for indirect, incidental, special, or consequential damages, and our total liability for any claim relating to a booking is limited to the amount of the Phrazs service fee we collected on that booking. Because Hosts and Guests contract directly, you release Phrazs from claims arising out of disputes between users.",
+          "Any claim or dispute relating to the platform or a booking must be brought within one (1) year after it arises; otherwise it is permanently barred, to the extent permitted by law.",
         ],
       },
       {
         id: "indemnity",
-        title: "11. Indemnification",
+        title: "14. Indemnification",
         paragraphs: [
           "You agree to defend and indemnify Phrazs against claims, damages, and costs (including reasonable legal fees) arising from your use of the platform, your bookings, your content, your breach of these Terms, or your violation of any law or third-party right.",
         ],
       },
       {
         id: "disputes",
-        title: "12. Dispute Resolution & Governing Law",
+        title: "15. Dispute Resolution & Governing Law",
         paragraphs: [
           "We encourage you to contact us first so we can try to resolve any concern informally. These Terms are governed by the laws of the State of Georgia, United States, without regard to conflict-of-laws rules.",
           "Except where prohibited by law, you and Phrazs agree to resolve disputes through binding individual arbitration rather than in court, and to waive any right to participate in a class action. You may opt out of arbitration by written notice within 30 days of first accepting these Terms.",
         ],
       },
       {
-        id: "changes",
-        title: "13. Changes, Suspension & Termination",
+        id: "privacy",
+        title: "16. Privacy & Data",
         paragraphs: [
-          "We may update these Terms from time to time; material changes will be posted here with a new \"Last updated\" date, and continued use means you accept them. You may stop using Phrazs at any time. We may suspend or terminate accounts that violate these Terms or create risk for the community.",
+          "Your use of Phrazs is also governed by how we handle personal data. The platform is operated and hosted in the United States; by using it you consent to the transfer, storage, and processing of your information in the United States.",
+          "We collect and use the information needed to run the marketplace — such as account, booking, and payment details — and share it with Hosts, Guests, and service providers (like our payment processor) only as needed to provide the service or as required by law. We do not sell your personal information.",
+        ],
+      },
+      {
+        id: "communications",
+        title: "17. Electronic Communications & Notices",
+        paragraphs: [
+          "By creating an account or making a booking, you agree to receive communications from Phrazs and other users electronically — including booking confirmations, receipts, service messages, and legal notices — at the email address or through the messaging tools associated with your account, and you agree that these satisfy any legal requirement that such communications be in writing.",
+        ],
+      },
+      {
+        id: "changes",
+        title: "18. Changes, Suspension & Termination",
+        paragraphs: [
+          "We may update these Terms from time to time; material changes will be posted here with a new \"Last updated\" date, and continued use means you accept them. You may stop using Phrazs at any time. We may suspend or terminate accounts that violate these Terms or create risk for the community. Sections that by their nature should survive termination — such as payment obligations, content licenses, disclaimers, liability limits, indemnification, and dispute resolution — continue to apply.",
+        ],
+      },
+      {
+        id: "general",
+        title: "19. General Provisions",
+        paragraphs: [
+          "These Terms, together with any policies referenced here and the applicable listing details, are the entire agreement between you and Phrazs regarding the platform and supersede prior agreements on the subject. If any provision is found unenforceable, the remaining provisions stay in effect.",
+          "Our failure to enforce a provision is not a waiver of it. You may not assign these Terms without our consent; we may assign them to an affiliate or successor. Neither party is liable for delays or failures caused by events beyond its reasonable control (force majeure). Section headings are for convenience only.",
         ],
       },
       {
         id: "contact",
-        title: "14. Contact",
+        title: "20. Contact",
         paragraphs: [
           "Questions about these Terms, a booking, or a refund? Contact Phrazs at contact@phrazs.com, Atlanta, GA, United States.",
         ],
