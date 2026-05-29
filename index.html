@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Phrazs | Find your setting</title>
+    <meta name="description" content="Handpicked houses, apartments, studios, and rooms for short-term creative rentals.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#home" aria-label="Phrazs home">
+        <img src="https://phrazs.com/wp-content/uploads/2023/12/cropped-site_logo.png" alt="Phrazs">
+      </a>
+      <nav class="main-nav" aria-label="Primary navigation">
+        <a href="#properties">Properties</a>
+        <a href="#media">Media</a>
+        <a href="#hosts">Hosts</a>
+        <a href="#blog">Blog</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button class="ghost-button" data-open-auth>Sign In</button>
+        <a class="primary-button" href="#list-property">List a Property</a>
+      </div>
+    </header>
+
+    <main id="home">
+      <section class="hero">
+        <div class="hero-media" aria-hidden="true"></div>
+        <div class="hero-content">
+          <p class="eyebrow">Phrazs marketplace</p>
+          <h1>Find the Perfect Backdrop for Your Story</h1>
+          <p>Explore unique, curated spaces available for short-term rent, ideal for shoots, special events, and creative projects.</p>
+          <form class="search-panel" id="heroSearch">
+            <label>
+              <span>Keywords</span>
+              <input type="search" id="searchInput" placeholder="Kitchen, studio, backyard">
+            </label>
+            <label>
+              <span>Category</span>
+              <select id="categorySelect">
+                <option value="All">All Categories</option>
+              </select>
+            </label>
+            <button class="primary-button" type="submit">Search</button>
+          </form>
+          <div class="quick-tags" id="quickTags"></div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="categoryTitle">
+        <div class="section-heading">
+          <p class="eyebrow">Top Categories</p>
+          <h2 id="categoryTitle">Explore the most popular categories.</h2>
+        </div>
+        <div class="category-grid" id="categoryGrid"></div>
+      </section>
+
+      <section class="steps-band">
+        <div>
+          <p class="eyebrow">Get started</p>
+          <h2>Your perfect space is just a few steps away</h2>
+        </div>
+        <div class="step-list">
+          <article>
+            <span>01</span>
+            <h3>Find a Property</h3>
+            <p>Browse and discover unique locations that bring your vision to life.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Check Reviews</h3>
+            <p>Read firsthand accounts from past visitors and creative teams.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Book a Space</h3>
+            <p>Book with ease and get your project rolling.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="properties" aria-labelledby="propertiesTitle">
+        <div class="section-heading">
+          <p class="eyebrow">Top Properties</p>
+          <h2 id="propertiesTitle">Check popular top-rated properties.</h2>
+        </div>
+        <div class="toolbar">
+          <div class="filter-group" id="filterButtons"></div>
+          <label class="sort-control">
+            <span>Sort</span>
+            <select id="sortSelect">
+              <option value="featured">Featured</option>
+              <option value="priceLow">Price: Low to High</option>
+              <option value="priceHigh">Price: High to Low</option>
+              <option value="spaceHigh">Sq Footage: High to Low</option>
+              <option value="ratingHigh">Rating: High to Low</option>
+            </select>
+          </label>
+        </div>
+        <div class="property-grid" id="propertyGrid"></div>
+      </section>
+
+      <section class="section media-section" id="media" aria-labelledby="mediaTitle">
+        <div class="section-heading">
+          <p class="eyebrow">Original Images</p>
+          <h2 id="mediaTitle">Public Phrazs media pulled from the live site.</h2>
+        </div>
+        <div class="media-grid" id="mediaGrid"></div>
+      </section>
+
+      <section class="section split-section" id="hosts" aria-labelledby="hostsTitle">
+        <div>
+          <p class="eyebrow">Meet Our Hosts</p>
+          <h2 id="hostsTitle">Trusted and experienced hosts.</h2>
+          <p>Hosts, studios, and property owners provide spaces for shoots, events, podcasts, and intimate productions.</p>
+        </div>
+        <div class="host-grid" id="hostGrid"></div>
+      </section>
+
+      <section class="testimonial-band" aria-labelledby="testimonialTitle">
+        <div>
+          <p class="eyebrow">What People Say</p>
+          <h2 id="testimonialTitle">Honest feedback from guests and hosts.</h2>
+        </div>
+        <div class="testimonial-grid" id="testimonialGrid"></div>
+      </section>
+
+      <section class="section" id="blog" aria-labelledby="blogTitle">
+        <div class="section-heading">
+          <p class="eyebrow">From the Blog</p>
+          <h2 id="blogTitle">Read recent articles from the Phrazs blog.</h2>
+        </div>
+        <div class="blog-grid" id="blogGrid"></div>
+      </section>
+
+      <section class="section contact-section" id="contact" aria-labelledby="contactTitle">
+        <form class="contact-form">
+          <label>Your name<input type="text" required></label>
+          <label>Your email<input type="email" required></label>
+          <label>Subject<input type="text" required></label>
+          <label>Your message<textarea rows="5"></textarea></label>
+          <button class="primary-button" type="submit">Send Message</button>
+        </form>
+        <div>
+          <p class="eyebrow">Contact</p>
+          <h2 id="contactTitle">Have questions about finding the perfect rental space?</h2>
+          <p>Whether you are a host or a guest, the Phrazs team is here to help you every step of the way.</p>
+          <p><strong>Email:</strong> <a href="mailto:contact@phrazs.com">contact@phrazs.com</a></p>
+          <p>Reach out today. We are committed to making your experience smooth and hassle-free.</p>
+        </div>
+      </section>
+
+      <section class="section admin-section" id="admin" aria-labelledby="adminTitle">
+        <div class="admin-lock" id="adminLock">
+          <p class="eyebrow">Owner Only</p>
+          <h2 id="adminTitle">Admin Dashboard</h2>
+          <p>This tab is separate from the public site. Sign in with the configured owner email to view extracted site data, property records, hosts, blog posts, inquiries, and export tools.</p>
+          <form id="adminLogin" class="admin-login">
+            <label>Owner email<input type="email" id="adminEmail" placeholder="contact@phrazs.com" required></label>
+            <label>Admin passcode<input type="password" id="adminPasscode" placeholder="Owner passcode" required></label>
+            <button class="primary-button" type="submit">Unlock Admin</button>
+            <p class="form-note" id="adminMessage"></p>
+          </form>
+        </div>
+        <div class="admin-dashboard" id="adminDashboard" hidden>
+          <div class="admin-topbar">
+            <div>
+              <p class="eyebrow">Admin</p>
+              <h2>Extracted Phrazs Data</h2>
+            </div>
+            <div class="admin-actions">
+              <button class="ghost-button" id="downloadData" type="button">Export JSON</button>
+              <button class="ghost-button" id="lockAdmin" type="button">Lock</button>
+            </div>
+          </div>
+          <div class="metric-grid" id="metricGrid"></div>
+          <div class="admin-tabs" role="tablist" aria-label="Admin data">
+            <button class="active" type="button" data-admin-tab="listings">Listings</button>
+            <button type="button" data-admin-tab="hosts">Hosts</button>
+            <button type="button" data-admin-tab="media">Media</button>
+            <button type="button" data-admin-tab="content">Content</button>
+            <button type="button" data-admin-tab="inquiries">Inquiries</button>
+            <button type="button" data-admin-tab="raw">Raw Data</button>
+          </div>
+          <div class="admin-panel" id="adminPanel"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <img src="https://phrazs.com/wp-content/uploads/2023/12/cropped-site_logo.png" alt="Phrazs">
+        <p>Handpicked houses, apartments and rooms for short-term rent.</p>
+      </div>
+      <nav aria-label="Footer navigation">
+        <a href="#properties">Properties</a>
+        <a href="#media">Media</a>
+        <a href="#blog">Blog</a>
+        <a href="#contact">Contact</a>
+        <a href="#admin">Admin</a>
+      </nav>
+      <p>Facebook · Twitter · LinkedIn</p>
+    </footer>
+
+    <div class="modal" id="authModal" hidden>
+      <div class="modal-panel">
+        <button class="modal-close" type="button" data-close-auth aria-label="Close">x</button>
+        <h2>Sign In</h2>
+        <label>Username or Email<input type="email" placeholder="you@example.com"></label>
+        <label>Password<input type="password" placeholder="Password"></label>
+        <button class="primary-button" type="button">Sign In</button>
+        <p class="form-note">Guest sign-in is a front-end placeholder. Admin access is handled in the separate Admin tab.</p>
+      </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="media.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
