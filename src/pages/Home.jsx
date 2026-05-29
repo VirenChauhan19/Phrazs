@@ -140,68 +140,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      <section className="section home-terms" id="terms-summary">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Before you book</p>
-            <h2>Terms &amp; Conditions</h2>
-            <p className="lead">
-              The essentials of using Phrazs — including how cancellations and refunds work. Last updated {data.terms.lastUpdated}.
-            </p>
-          </div>
-          <Link className="text-link" to="/terms">
-            Read the full terms →
-          </Link>
-        </div>
-
-        <div className="home-terms__grid">
-          <ul className="home-terms__points">
-            {data.terms.highlights.map((h, i) => (
-              <li key={i}>{h}</li>
-            ))}
-          </ul>
-
-          <div className="home-terms__refunds">
-            <h3>Cancellation &amp; Refund Policy</h3>
-            <p className="muted small">
-              Each listing shows one of these policies. Refund of the space fee depends on when you cancel; the {data.terms.serviceFeeRate} service
-              fee is refundable within 24 hours of booking, if the host cancels, or under Extenuating Circumstances.
-            </p>
-            <div className="cancel-table-wrap">
-              <table className="cancel-table">
-                <thead>
-                  <tr>
-                    <th>Policy</th>
-                    <th>Full refund</th>
-                    <th>50% refund</th>
-                    <th>No refund</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.terms.cancellationTiers.map((tier) => (
-                    <tr key={tier.name}>
-                      <td>
-                        <strong>{tier.name}</strong>
-                      </td>
-                      <td>{tier.full}</td>
-                      <td>{tier.partial}</td>
-                      <td>{tier.none}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="muted small">
-              Host cancellations are refunded in full, including the service fee. Questions? Email{" "}
-              <a href={`mailto:${data.terms.contactEmail}`}>{data.terms.contactEmail}</a>.{" "}
-              <Link className="text-link" to="/terms">
-                See full Terms &amp; Refund Policy →
-              </Link>
-            </p>
-          </div>
-        </div>
-      </section>
     </>
   );
 }

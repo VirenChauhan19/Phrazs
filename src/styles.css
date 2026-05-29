@@ -559,6 +559,10 @@ blockquote span { color: #b8f2df; font-size: 0.86rem; }
 .booking-receipt__notes { margin: 0; font-style: italic; }
 .booking-receipt__actions { display: flex; align-items: center; gap: 18px; }
 .booking-error { margin: 0; color: #b3261e; font-weight: 700; font-size: 0.9rem; }
+.terms-check { display: flex; align-items: flex-start; gap: 10px; color: var(--ink); font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.terms-check input { width: 18px; height: 18px; min-height: 0; margin-top: 1px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+.terms-check span { line-height: 1.4; }
+.terms-check a { color: var(--accent-dark); font-weight: 800; }
 .fade-in { animation: fade-in 220ms ease; }
 @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .spinner { width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.5); border-top-color: #fff; border-radius: 50%; animation: spin 700ms linear infinite; }
@@ -812,46 +816,6 @@ table.clickable tbody tr:focus-visible { outline: 2px solid #2271b1; outline-off
   html { scroll-behavior: auto; }
 }
 
-/* ---------- Home: Terms & Refunds summary ---------- */
-.home-terms { background: var(--soft); }
-.home-terms__grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 32px; align-items: start; }
-.home-terms__points {
-  display: grid;
-  gap: 14px;
-  margin: 0;
-  padding: 24px 26px 24px 44px;
-  list-style: none;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 10px 24px rgba(22, 33, 31, 0.06);
-}
-.home-terms__points li { position: relative; font-weight: 600; color: #3a4744; }
-.home-terms__points li::before {
-  content: "✓";
-  position: absolute;
-  left: -26px;
-  top: -1px;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 50%;
-  font-size: 0.72rem;
-  font-weight: 900;
-}
-.home-terms__refunds {
-  padding: 24px 26px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 10px 24px rgba(22, 33, 31, 0.06);
-}
-.home-terms__refunds h3 { margin-bottom: 8px; }
-.home-terms__refunds .cancel-table-wrap { margin: 14px 0; }
-
 /* ---------- Legal / Terms page ---------- */
 .legal-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 40px; align-items: start; }
 .legal-toc { position: sticky; top: 96px; display: grid; gap: 6px; }
@@ -902,7 +866,6 @@ table.clickable tbody tr:focus-visible { outline: 2px solid #2271b1; outline-off
   .legal-layout { grid-template-columns: 1fr; gap: 20px; }
   .legal-toc { position: static; }
   .legal-toc nav { grid-auto-flow: row; }
-  .home-terms__grid { grid-template-columns: 1fr; }
   .leaflet-map { height: 420px; }
   .detail-grid { grid-template-columns: 1fr; }
   .detail-side { position: static; }

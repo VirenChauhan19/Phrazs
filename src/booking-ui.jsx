@@ -38,6 +38,7 @@ function defaultForm(listing) {
     cardNumber: "",
     expiry: "",
     cvc: "",
+    acceptedTerms: false,
   };
 }
 
@@ -173,6 +174,10 @@ export function BookingUIProvider({ children }) {
   const confirmAndPay = async () => {
     if (!paymentValid) {
       setError("Enter valid card details to confirm. Try 4242 4242 4242 4242.");
+      return;
+    }
+    if (!form.acceptedTerms) {
+      setError("Please accept the Terms & Conditions to confirm your booking.");
       return;
     }
     setError("");
@@ -396,19 +401,22 @@ export function BookingUIProvider({ children }) {
                       <input type="text" inputMode="numeric" placeholder="123" value={form.cvc} onChange={(e) => update({ cvc: e.target.value.replace(/\D/g, "").slice(0, 4) })} />
                     </label>
                   </div>
+                  <label className="terms-check">
+                    <input type="checkbox" checked={form.acceptedTerms} onChange={(e) => update({ acceptedTerms: e.target.checked })} />
+                    <span>
+                      I have read and agree to the{" "}
+                      <a href="#/terms" target="_blank" rel="noreferrer">
+                        Terms &amp; Conditions
+                      </a>
+                      , including the cancellation and refund policy.
+                    </span>
+                  </label>
                   {error && <p className="booking-error">{error}</p>}
-                  <button className="primary-button block" type="button" onClick={confirmAndPay} disabled={processing}>
+                  <button className="primary-button block" type="button" onClick={confirmAndPay} disabled={processing || !form.acceptedTerms}>
                     {processing ? <span className="spinner" /> : null}
                     {processing ? "Processing…" : `Pay ${money(pricing.total)}`}
                   </button>
                   <p className="muted small center">Secured by Stripe · You won't be charged in test mode.</p>
-                  <p className="muted small center">
-                    By paying you agree to the{" "}
-                    <a href="#/terms" target="_blank" rel="noreferrer">
-                      Terms &amp; Refund Policy
-                    </a>
-                    .
-                  </p>
                 </div>
               )}
 
