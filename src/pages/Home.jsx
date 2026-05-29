@@ -31,7 +31,9 @@ export default function Home() {
         <div className="hero-media" aria-hidden="true" />
         <div className="hero-content">
           <p className="eyebrow">Phrazs marketplace</p>
-          <h1>Find the Perfect Backdrop for Your Story</h1>
+          <h1>
+            Find the perfect <em>backdrop</em> for your story
+          </h1>
           <p>Explore unique, curated spaces available for short-term rent, ideal for shoots, special events, and creative projects.</p>
           <form className="search-panel" onSubmit={runSearch}>
             <label>
