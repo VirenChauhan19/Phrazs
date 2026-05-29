@@ -10,6 +10,8 @@ import Hosts from "./pages/Hosts.jsx";
 import Blog from "./pages/Blog.jsx";
 import About from "./pages/About.jsx";
 import Admin from "./pages/Admin.jsx";
+import MyBookings from "./pages/MyBookings.jsx";
+import Terms from "./pages/Terms.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -33,6 +35,7 @@ const REVEAL_SELECTOR = [
   ".detail-stats > div",
   ".contact-form",
   ".admin-overview > article",
+  ".booking-receipt",
 ].join(",");
 
 function ScrollReveal({ pathname }) {
@@ -103,6 +106,8 @@ export default function App() {
             <Route path="/hosts" element={<Hosts />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/about" element={<About />} />
+            <Route path="/bookings" element={<MyBookings />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<Home />} />
           </Routes>

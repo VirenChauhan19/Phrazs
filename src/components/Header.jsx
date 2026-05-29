@@ -12,7 +12,7 @@ const baseTabs = [
 ];
 
 export default function Header() {
-  const { data } = useStore();
+  const { data, userBookingCount } = useStore();
   const { isAdmin, signIn, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -23,7 +23,11 @@ export default function Header() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const tabs = isAdmin ? [...baseTabs, { to: "/admin", label: "Admin" }] : baseTabs;
+  const tabs = [
+    ...baseTabs,
+    ...(userBookingCount > 0 ? [{ to: "/bookings", label: "My Bookings" }] : []),
+    ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
+  ];
 
   const closeAuth = () => {
     setAuthOpen(false);

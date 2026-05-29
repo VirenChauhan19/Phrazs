@@ -12,6 +12,12 @@ export default function Explore() {
   const [sort, setSort] = useState("featured");
   const [activeId, setActiveId] = useState(null);
 
+  // When a map marker is hovered, highlight and scroll its card into view.
+  const focusFromMap = (id) => {
+    setActiveId(id);
+    if (id) document.getElementById(`result-${id}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  };
+
   const categories = ["All", ...new Set(listings.map((l) => l.category))];
 
   useEffect(() => {
@@ -105,7 +111,13 @@ export default function Explore() {
           {filtered.length ? (
             <div className="property-grid two">
               {filtered.map((item) => (
-                <div key={item.id} className={activeId === item.id ? "hl" : ""} onMouseEnter={() => setActiveId(item.id)} onMouseLeave={() => setActiveId(null)}>
+                <div
+                  key={item.id}
+                  id={`result-${item.id}`}
+                  className={activeId === item.id ? "hl" : ""}
+                  onMouseEnter={() => setActiveId(item.id)}
+                  onMouseLeave={() => setActiveId(null)}
+                >
                   <PropertyCard item={item} />
                 </div>
               ))}
@@ -115,7 +127,7 @@ export default function Explore() {
           )}
         </div>
         <div className="explore-map">
-          <MapView listings={filtered} activeId={activeId} onHover={setActiveId} />
+          <MapView listings={filtered} activeId={activeId} onHover={focusFromMap} />
         </div>
       </div>
     </section>

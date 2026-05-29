@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 import PHRAZS_DATA from "./data.js";
 import PHRAZS_MEDIA from "./media.js";
-import { dayCount, dateRange } from "./utils.js";
 
 const STORAGE_KEY = "phrazs_user_records_v1";
 const PLATFORM_RATE = 0.15; // service fee charged to guest / commission used for payout split
@@ -78,15 +77,24 @@ export function StoreProvider({ children }) {
   }, [records.users]);
 
   const createBooking = useCallback((listing, form) => {
-    const hoursPerDay = Math.max(1, Number(form.hours) || 1);
     const crew = Math.max(1, Number(form.crew) || 1);
-    const date = form.date;
-    const endDate = form.endDate && form.endDate >= date ? form.endDate : date;
-    const days = dayCount(date, endDate);
-    const hours = hoursPerDay * days; // total billable hours across the stay
-    const { subtotal, platformFee, hostPayout, total } = priceBooking(listing.price, hours);
     const startTime = form.startTime || "09:00";
-    const endTime = addHoursToTime(startTime, hoursPerDay);
+
+    // Normalize the per-day schedule. Falls back to a single day from the form
+    // so older single-day callers keep working.
+    const schedule = (Array.isArray(form.schedule) && form.schedule.length
+      ? form.schedule
+      : [{ date: form.date, hours: Math.max(1, Number(form.hours) || 1) }]
+    ).map((d) => ({ date: d.date, hours: Math.max(1, Number(d.hours) || 1) }));
+
+    const date = schedule[0].date;
+    const endDate = schedule[schedule.length - 1].date;
+    const days = schedule.length;
+    const hours = schedule.reduce((sum, d) => sum + d.hours, 0); // total billable hours across the stay
+    const uniform = schedule.every((d) => d.hours === schedule[0].hours);
+    const hoursPerDay = uniform ? schedule[0].hours : null; // null when days differ
+    const endTime = addHoursToTime(startTime, schedule[schedule.length - 1].hours);
+    const { subtotal, platformFee, hostPayout, total } = priceBooking(listing.price, hours);
 
     setRecords((prev) => {
       const allBookings = [...prev.bookings, ...PHRAZS_DATA.bookings];
@@ -111,6 +119,7 @@ export function StoreProvider({ children }) {
         days,
         hoursPerDay,
         hours,
+        schedule,
         crew,
         status: "Confirmed",
         paymentStatus: "Paid",
@@ -149,13 +158,13 @@ export function StoreProvider({ children }) {
         payoutDate: payoutDate.toISOString().slice(0, 10),
       };
 
-      // Block every day of the stay on the calendar, not just the first.
-      const calendarEntries = dateRange(date, endDate).map((day) => ({
-        date: day,
+      // Block every day of the stay on the calendar, each with its own hours.
+      const calendarEntries = schedule.map((d) => ({
+        date: d.date,
         property: listing.title,
         status: "Booked",
         bookingId,
-        time: `${startTime}-${endTime}`,
+        time: `${startTime}-${addHoursToTime(startTime, d.hours)}`,
       }));
 
       // Add a guest user record only if this email is brand new.
@@ -187,7 +196,7 @@ export function StoreProvider({ children }) {
       };
     });
 
-    return { subtotal, platformFee, hostPayout, total, hours, hoursPerDay, days, crew, startTime, endTime, date, endDate };
+    return { subtotal, platformFee, hostPayout, total, hours, hoursPerDay, days, schedule, crew, startTime, endTime, date, endDate };
   }, []);
 
   const submitInquiry = useCallback((form) => {
@@ -237,6 +246,7 @@ export function StoreProvider({ children }) {
       calendar,
       inquiries,
       users,
+      myBookings: records.bookings,
       userBookingCount: records.bookings.length,
       createBooking,
       submitInquiry,

@@ -7,7 +7,13 @@ import { mediaByPage } from "../media.js";
 import { useBookingUI } from "../booking-ui.jsx";
 import { money } from "../utils.js";
 
-const pin = L.divIcon({ className: "price-marker-wrap", html: '<div class="price-marker active">●</div>', iconSize: [20, 20], iconAnchor: [10, 10] });
+const detailPin = (price) =>
+  L.divIcon({
+    className: "price-marker-wrap",
+    html: `<div class="price-marker active cat-default"><span class="pm-price">$${price}</span><span class="pm-stem"></span></div>`,
+    iconSize: [64, 36],
+    iconAnchor: [32, 36],
+  });
 
 export default function ListingDetail() {
   const { id } = useParams();
@@ -166,8 +172,12 @@ export default function ListingDetail() {
           {typeof listing.lat === "number" && (
             <div className="detail-map">
               <MapContainer center={[listing.lat, listing.lng]} zoom={13} scrollWheelZoom={false} className="leaflet-map small">
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
-                <Marker position={[listing.lat, listing.lng]} icon={pin} />
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                  subdomains="abcd"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                />
+                <Marker position={[listing.lat, listing.lng]} icon={detailPin(listing.price)} />
               </MapContainer>
               <p className="muted small">{listing.city}</p>
             </div>

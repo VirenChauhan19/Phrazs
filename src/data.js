@@ -446,8 +446,170 @@ export const PHRAZS_DATA = {
     company: "Phrazs",
     jurisdiction: "Georgia, United States",
     payments: ["Visa", "Mastercard", "American Express", "Discover"],
-    refundPolicy: "All sales are final and no refund will be issued.",
+    refundPolicy:
+      "Refunds follow the cancellation policy shown on each listing (Flexible, Standard, or Strict). The 15% service fee is refundable within a 24-hour grace period after booking, when a host cancels, or under the Extenuating Circumstances policy.",
     privacy: "The services are hosted in the United States and users consent to data transfer and processing in the United States.",
+  },
+  // Plain-language terms written for Phrazs, organized in the spirit of a modern
+  // marketplace's Terms of Service and Cancellation/Refund policy.
+  terms: {
+    effectiveDate: "May 29, 2026",
+    lastUpdated: "May 29, 2026",
+    entity: "Phrazs",
+    address: "Atlanta, GA, United States",
+    contactEmail: "contact@phrazs.com",
+    governingLaw: "State of Georgia, United States",
+    serviceFeeRate: "15%",
+    refundWindowHours: 24,
+    highlights: [
+      "Phrazs is a marketplace that connects Guests with Hosts who list spaces for shoots, events, and productions. Phrazs does not own, manage, or operate the spaces.",
+      "When you book, you enter a direct agreement with the Host and agree to that listing's House Rules, hours, and crew limits.",
+      "Each listing shows a cancellation policy — Flexible, Standard, or Strict — that determines your refund.",
+      "The 15% service fee is refundable within 24 hours of booking (if your start time is 48+ hours away), if the Host cancels, or under Extenuating Circumstances.",
+      "Payments are processed securely by our payment partner. Never pay or accept payment outside of Phrazs.",
+    ],
+    cancellationTiers: [
+      {
+        name: "Flexible",
+        full: "Cancel 24+ hours before start",
+        partial: "—",
+        none: "Less than 24 hours before start",
+        usedFor: "Guests who may need to adjust plans.",
+      },
+      {
+        name: "Standard (default)",
+        full: "7+ days before start",
+        partial: "48 hours–7 days before start (50%)",
+        none: "Less than 48 hours before start",
+        usedFor: "Applies unless the Host selects another policy.",
+      },
+      {
+        name: "Strict",
+        full: "—",
+        partial: "14+ days before start (50%)",
+        none: "Less than 14 days before start",
+        usedFor: "High-demand spaces and large productions.",
+      },
+    ],
+    sections: [
+      {
+        id: "marketplace",
+        title: "1. Phrazs is a Marketplace",
+        paragraphs: [
+          "Phrazs operates an online platform that lets people who own or control creative spaces (\"Hosts\") offer those spaces for short-term hourly or daily use, and lets people who want to use them (\"Guests\") discover and book them.",
+          "Phrazs is not a party to the agreement between a Host and a Guest. We do not own, sell, resell, control, manage, inspect, or operate any listed space, and we are not a real-estate broker, insurer, or event organizer. When a booking is confirmed, a direct contract is formed between the Host and the Guest. Phrazs provides the technology, booking tools, and payment facilitation that make that contract possible.",
+        ],
+      },
+      {
+        id: "eligibility",
+        title: "2. Eligibility & Accounts",
+        paragraphs: [
+          "You must be at least 18 years old and able to enter into a binding contract to use Phrazs. You agree to provide accurate, current information and to keep it up to date.",
+          "You are responsible for activity that happens through your account and for keeping your login credentials secure. Tell us promptly at the contact email below if you believe your account has been compromised.",
+        ],
+      },
+      {
+        id: "bookings",
+        title: "3. Bookings & House Rules",
+        paragraphs: [
+          "A booking is confirmed when the Guest completes checkout and payment is authorized. The booking covers the specific date(s), start time, and hours selected, up to the listing's published hours-per-day and crew/occupancy limits.",
+          "Setup and teardown must take place within the booked time unless the Host agrees otherwise in writing. Exceeding your booked hours, crew size, or the listing's House Rules may result in additional charges, early termination of the booking without refund, or removal from the platform.",
+        ],
+      },
+      {
+        id: "payments",
+        title: "4. Payments, Fees & Taxes",
+        paragraphs: [
+          "The Guest pays the space subtotal plus a 15% Phrazs service fee at checkout. The Host receives the subtotal minus a 15% commission, paid out after the booking begins (typically within two business days, subject to the payment processor).",
+          "Payments are collected and processed by our third-party payment partner; by booking you also agree to that processor's terms. All amounts are in U.S. dollars. You are responsible for any taxes that apply to your use of a space unless stated otherwise. Paying or accepting payment for a Phrazs booking outside the platform is prohibited and may lead to account suspension.",
+        ],
+      },
+      {
+        id: "cancellation",
+        title: "5. Cancellation & Refund Policy",
+        paragraphs: [
+          "Every listing displays one of three cancellation policies — Flexible, Standard, or Strict — summarized in the table below. The refund of the space fee depends on how far before your start time you cancel.",
+          "Service fee: The 15% service fee is non-refundable, except (a) when you cancel within 24 hours of booking and your start time is at least 48 hours away, (b) when the Host cancels, or (c) under the Extenuating Circumstances policy.",
+          "Host cancellations: If a Host cancels a confirmed booking, the Guest receives a 100% refund including the service fee, and we will help you find a comparable space where possible. Repeated Host cancellations may lead to penalties or removal.",
+          "Extenuating Circumstances: If a serious event outside your control (for example, a natural disaster, government order, or other major emergency) makes it unsafe or impossible to use a space, you may request a full refund. We may ask for documentation.",
+          "How refunds work: Approved refunds are issued to your original payment method, typically within 5–10 business days depending on your bank. To cancel, open the booking under My Bookings or contact us at the email below before your start time. Initiating a chargeback instead of requesting a refund through Phrazs may delay resolution and result in account suspension.",
+        ],
+      },
+      {
+        id: "guests",
+        title: "6. Guest Responsibilities",
+        paragraphs: [
+          "Treat every space with care and leave it in the condition you found it. You are responsible for your crew, guests, and invitees, and for any damage beyond normal wear during your booking. Hosts may seek reimbursement for damage, excessive cleaning, or overstays, which Phrazs may charge to your payment method.",
+          "Follow all House Rules, occupancy and crew limits, check-in/out times, and applicable laws while using a space.",
+        ],
+      },
+      {
+        id: "hosts",
+        title: "7. Host Responsibilities",
+        paragraphs: [
+          "Hosts must have the right to list and offer their space, keep listings accurate (photos, location, amenities, rules, capacity, and availability), and provide the space in a safe, clean, and legal condition that matches the listing.",
+          "Hosts are responsible for their own taxes, permits, insurance, and compliance with local laws, and must honor confirmed bookings. Hosts may not discriminate against Guests in violation of applicable law.",
+        ],
+      },
+      {
+        id: "content",
+        title: "8. Your Content & Reviews",
+        paragraphs: [
+          "You retain ownership of the content you submit (listings, photos, messages, and reviews), and you grant Phrazs a non-exclusive, worldwide, royalty-free license to host, display, and promote that content in connection with operating the platform.",
+          "Reviews must be honest and based on a genuine experience. We may remove content that is unlawful, deceptive, infringing, or that violates these Terms.",
+        ],
+      },
+      {
+        id: "prohibited",
+        title: "9. Prohibited Conduct",
+        paragraphs: ["You agree not to use Phrazs or any space to:"],
+        list: [
+          "break any law, infringe others' rights, or create safety hazards;",
+          "exceed the listing's posted crew, occupancy, or hour limits;",
+          "host activities prohibited by a listing's House Rules (for example, open flames, smoking, or adult content where disallowed);",
+          "arrange or make payment for a Phrazs booking off-platform;",
+          "scrape, reverse-engineer, disrupt, or misuse the platform; or",
+          "post false, misleading, or fraudulent listings, reviews, or claims.",
+        ],
+      },
+      {
+        id: "liability",
+        title: "10. Disclaimers & Limitation of Liability",
+        paragraphs: [
+          "The platform and all listings are provided \"as is\" and \"as available\" without warranties of any kind. Phrazs does not warrant the existence, quality, safety, or legality of any space, or the accuracy of any listing.",
+          "To the maximum extent permitted by law, Phrazs is not liable for indirect, incidental, special, or consequential damages, and our total liability for any claim relating to a booking is limited to the amount of the Phrazs service fee we collected on that booking. Because Hosts and Guests contract directly, you release Phrazs from claims arising out of disputes between users.",
+        ],
+      },
+      {
+        id: "indemnity",
+        title: "11. Indemnification",
+        paragraphs: [
+          "You agree to defend and indemnify Phrazs against claims, damages, and costs (including reasonable legal fees) arising from your use of the platform, your bookings, your content, your breach of these Terms, or your violation of any law or third-party right.",
+        ],
+      },
+      {
+        id: "disputes",
+        title: "12. Dispute Resolution & Governing Law",
+        paragraphs: [
+          "We encourage you to contact us first so we can try to resolve any concern informally. These Terms are governed by the laws of the State of Georgia, United States, without regard to conflict-of-laws rules.",
+          "Except where prohibited by law, you and Phrazs agree to resolve disputes through binding individual arbitration rather than in court, and to waive any right to participate in a class action. You may opt out of arbitration by written notice within 30 days of first accepting these Terms.",
+        ],
+      },
+      {
+        id: "changes",
+        title: "13. Changes, Suspension & Termination",
+        paragraphs: [
+          "We may update these Terms from time to time; material changes will be posted here with a new \"Last updated\" date, and continued use means you accept them. You may stop using Phrazs at any time. We may suspend or terminate accounts that violate these Terms or create risk for the community.",
+        ],
+      },
+      {
+        id: "contact",
+        title: "14. Contact",
+        paragraphs: [
+          "Questions about these Terms, a booking, or a refund? Contact Phrazs at contact@phrazs.com, Atlanta, GA, United States.",
+        ],
+      },
+    ],
   },
 };
 

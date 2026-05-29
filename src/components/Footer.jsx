@@ -14,7 +14,7 @@ export default function Footer() {
         <Link to="/hosts">Hosts</Link>
         <Link to="/blog">Blog</Link>
         <Link to="/about">About</Link>
-        <Link to="/admin">Admin</Link>
+        <Link to="/terms">Terms &amp; Refunds</Link>
       </nav>
       <p>Facebook · Twitter · LinkedIn</p>
     </footer>

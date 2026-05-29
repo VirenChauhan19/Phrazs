@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useStore } from "../store.jsx";
 import { useAuth } from "../auth.jsx";
 import { ADMIN_EMAIL, ADMIN_PASSCODE } from "../data.js";
@@ -21,11 +21,11 @@ const TABS = [
   ["raw", "Tools / Export"],
 ];
 
-function Table({ columns, rows }) {
+function Table({ columns, rows, onRowClick }) {
   if (!rows.length) return <p className="empty-state">Nothing here yet.</p>;
   return (
     <div className="table-wrap">
-      <table>
+      <table className={onRowClick ? "clickable" : ""}>
         <thead>
           <tr>
             {columns.map((c) => (
@@ -35,7 +35,12 @@ function Table({ columns, rows }) {
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={row.id || i}>
+            <tr
+              key={row.id || i}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+              tabIndex={onRowClick ? 0 : undefined}
+              onKeyDown={onRowClick ? (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onRowClick(row)) : undefined}
+            >
               {columns.map((c) => (
                 <td key={c.label}>{c.render(row)}</td>
               ))}
@@ -49,6 +54,143 @@ function Table({ columns, rows }) {
 
 const Status = ({ children }) => <span className="status">{children}</span>;
 
+function Field({ label, children }) {
+  if (children === null || children === undefined || children === "") return null;
+  return (
+    <div className="bd-field">
+      <span>{label}</span>
+      <strong>{children}</strong>
+    </div>
+  );
+}
+
+function BookingDetail({ booking, listing, payment, payout, calendar, onClose }) {
+  if (!booking) return null;
+  const schedule = Array.isArray(booking.schedule) ? booking.schedule : null;
+  const multiDay = booking.days > 1;
+  return (
+    <div className="bd-overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="bd-modal" role="dialog" aria-modal="true" aria-label={`Booking ${booking.id}`}>
+        <div className="bd-head">
+          <div>
+            <span className="status">{booking.id}</span>
+            <h2>{booking.property}</h2>
+            <p className="muted">
+              {multiDay ? `${booking.date} → ${booking.endDate}` : `${booking.start} – ${booking.end}`}
+            </p>
+          </div>
+          <button className="modal-close" type="button" onClick={onClose} aria-label="Close">
+            ✕
+          </button>
+        </div>
+
+        <div className="bd-body">
+          <section className="bd-section">
+            <h3>Booking</h3>
+            <div className="bd-grid">
+              <Field label="Status">{booking.status}</Field>
+              <Field label="Payment status">{booking.paymentStatus}</Field>
+              <Field label="Property ID">{booking.propertyId}</Field>
+              <Field label="Category">{listing?.category}</Field>
+              <Field label="City">{listing?.city}</Field>
+              <Field label="Days">{multiDay ? booking.days : 1}</Field>
+              <Field label="Total hours">{booking.hours}</Field>
+              <Field label="Crew / guests">{booking.crew}</Field>
+              <Field label="Created">{booking.createdAt ? new Date(booking.createdAt).toLocaleString() : null}</Field>
+              <Field label="Source">{booking.source}</Field>
+            </div>
+          </section>
+
+          <section className="bd-section">
+            <h3>People</h3>
+            <div className="bd-grid">
+              <Field label="Guest">{booking.guest}</Field>
+              <Field label="Guest email">
+                {booking.guestEmail ? <a href={`mailto:${booking.guestEmail}`}>{booking.guestEmail}</a> : null}
+              </Field>
+              <Field label="Host">{booking.host}</Field>
+            </div>
+          </section>
+
+          {schedule && (
+            <section className="bd-section">
+              <h3>Per-day schedule</h3>
+              <div className="bd-schedule">
+                {schedule.map((d) => (
+                  <div className="bd-day" key={d.date}>
+                    <span>{d.date}</span>
+                    <strong>{d.hours} hrs</strong>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className="bd-section">
+            <h3>Money</h3>
+            <div className="bd-grid">
+              <Field label="Rate">{listing ? `${money(listing.price)} / hr` : null}</Field>
+              <Field label="Subtotal">{money(booking.subtotal)}</Field>
+              <Field label="Platform fee">{money(booking.platformFee)}</Field>
+              <Field label="Host payout">{money(booking.hostPayout)}</Field>
+              <Field label="Total">{money(booking.total)}</Field>
+            </div>
+          </section>
+
+          {payment && (
+            <section className="bd-section">
+              <h3>Payment · {payment.id}</h3>
+              <div className="bd-grid">
+                <Field label="Processor">{payment.processor}</Field>
+                <Field label="Method">{`${payment.method} · ${payment.cardBrand} ending ${payment.last4}`}</Field>
+                <Field label="Gross">{money(payment.gross)}</Field>
+                <Field label="Fees">{money(payment.fees)}</Field>
+                <Field label="Net">{money(payment.net)}</Field>
+                <Field label="Refunded">{money(payment.refunded)}</Field>
+                <Field label="Status">{payment.status}</Field>
+                <Field label="Captured">{payment.capturedAt}</Field>
+              </div>
+            </section>
+          )}
+
+          {payout && (
+            <section className="bd-section">
+              <h3>Payout · {payout.id}</h3>
+              <div className="bd-grid">
+                <Field label="Host">{payout.host}</Field>
+                <Field label="Amount">{money(payout.amount)}</Field>
+                <Field label="Status">{payout.status}</Field>
+                <Field label="Payout date">{payout.payoutDate}</Field>
+              </div>
+            </section>
+          )}
+
+          {calendar.length > 0 && (
+            <section className="bd-section">
+              <h3>Calendar blocks</h3>
+              <div className="bd-schedule">
+                {calendar.map((c, i) => (
+                  <div className="bd-day" key={`${c.date}-${i}`}>
+                    <span>{c.date}</span>
+                    <strong>{c.time}</strong>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {booking.notes && (
+            <section className="bd-section">
+              <h3>Notes</h3>
+              <p className="muted">{booking.notes}</p>
+            </section>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Admin() {
   const store = useStore();
   const { data, media, listings, hosts, bookings, payments, payouts, calendar, users, inquiries, userBookingCount, exportData, resetUserData } = store;
@@ -58,6 +200,18 @@ export default function Admin() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
+  const [detailId, setDetailId] = useState(null);
+
+  useEffect(() => {
+    if (!detailId) return;
+    const onKey = (e) => e.key === "Escape" && setDetailId(null);
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [detailId]);
 
   const metrics = useMemo(() => {
     const paidGross = payments.reduce((s, p) => s + (p.gross || 0), 0);
@@ -132,6 +286,12 @@ export default function Admin() {
 
   const activeBookings = bookings.filter((b) => ["Active", "Confirmed", "Pending Payment"].includes(b.status));
   const completedBookings = bookings.filter((b) => b.status === "Completed");
+
+  const detailBooking = detailId ? bookings.find((b) => b.id === detailId) : null;
+  const detailListing = detailBooking ? listings.find((l) => l.id === detailBooking.propertyId) : null;
+  const detailPayment = detailBooking ? payments.find((p) => p.bookingId === detailBooking.id) : null;
+  const detailPayout = detailBooking ? payouts.find((p) => p.bookingId === detailBooking.id) : null;
+  const detailCalendar = detailBooking ? calendar.filter((c) => c.bookingId === detailBooking.id) : [];
 
   return (
     <section className="section admin-section">
@@ -210,6 +370,7 @@ export default function Admin() {
                   <h3 className="panel-heading">Upcoming Work</h3>
                   <Table
                     rows={bookings.filter((b) => b.status !== "Completed")}
+                    onRowClick={(b) => setDetailId(b.id)}
                     columns={[
                       { label: "Booking", render: (b) => (<><strong>{b.id}</strong><small>{b.property}</small></>) },
                       { label: "Guest", render: (b) => (<>{b.guest}<small>{b.guestEmail}</small></>) },
@@ -224,8 +385,11 @@ export default function Admin() {
               )}
 
               {tab === "bookings" && (
+                <>
+                  <p className="table-hint">Tip: click any booking to see full details.</p>
                 <Table
                   rows={bookings}
+                  onRowClick={(b) => setDetailId(b.id)}
                   columns={[
                     { label: "Booking", render: (b) => (<><strong>{b.id}</strong><small>{b.property}</small>{b.source === "guest-booking" && <small className="tag-new">NEW</small>}</>) },
                     { label: "Guest", render: (b) => (<>{b.guest}<small>{b.guestEmail}</small></>) },
@@ -238,11 +402,13 @@ export default function Admin() {
                     { label: "Total", render: (b) => money(b.total) },
                   ]}
                 />
+                </>
               )}
 
               {tab === "active" && (
                 <Table
                   rows={activeBookings}
+                  onRowClick={(b) => setDetailId(b.id)}
                   columns={[
                     { label: "Booking", render: (b) => (<><strong>{b.id}</strong><small>{b.property}</small></>) },
                     { label: "Date", render: (b) => b.date },
@@ -259,6 +425,7 @@ export default function Admin() {
               {tab === "completed" && (
                 <Table
                   rows={completedBookings}
+                  onRowClick={(b) => setDetailId(b.id)}
                   columns={[
                     { label: "Booking", render: (b) => (<><strong>{b.id}</strong><small>{b.property}</small></>) },
                     { label: "Completed", render: (b) => b.date },
@@ -420,6 +587,15 @@ export default function Admin() {
           </div>
         </div>
       </div>
+
+      <BookingDetail
+        booking={detailBooking}
+        listing={detailListing}
+        payment={detailPayment}
+        payout={detailPayout}
+        calendar={detailCalendar}
+        onClose={() => setDetailId(null)}
+      />
     </section>
   );
 }

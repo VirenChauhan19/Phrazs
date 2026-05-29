@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useStore, priceBooking } from "./store.jsx";
-import { money, todayISO, prettyDate, dayCount, addDays } from "./utils.js";
+import { money, todayISO, prettyDate, shortDate, dateRange, addDays } from "./utils.js";
 
 function addHoursToTime(time, hours) {
   const [h, m] = String(time || "09:00").split(":").map((v) => Number(v) || 0);
@@ -28,7 +28,8 @@ function defaultForm(listing) {
     date: start,
     endDate: start,
     startTime: "09:00",
-    hours: Math.min(Math.max(listing?.hours || 2, 1), 4) || 2, // hours per day
+    hours: Math.min(Math.max(listing?.hours || 2, 1), 4) || 2, // default hours applied to each day
+    hoursByDate: {}, // per-day overrides for multi-day bookings, keyed by YYYY-MM-DD
     crew: 1,
     name: "",
     email: "",
@@ -87,9 +88,23 @@ export function BookingUIProvider({ children }) {
   }, []);
 
   const hoursPerDay = Math.max(1, Number(form.hours) || 1);
-  const days = form.mode === "range" ? dayCount(form.date, form.endDate) : 1;
-  const totalHours = hoursPerDay * days;
-  const endTime = addHoursToTime(form.startTime, hoursPerDay);
+
+  // Build a per-day schedule. Each day can carry its own hours (a `hoursByDate`
+  // override); days with no override fall back to the default `form.hours`.
+  const scheduleDates = form.mode === "range" ? dateRange(form.date, form.endDate) : [form.date];
+  const schedule = scheduleDates.map((date) => ({
+    date,
+    hours: Math.max(1, Number(form.hoursByDate?.[date] ?? form.hours) || 1),
+  }));
+  const days = schedule.length;
+  const totalHours = schedule.reduce((sum, d) => sum + d.hours, 0);
+
+  // Listings can publish a per-day hours cap and a crew/guest cap (either may be null = no cap).
+  const hoursCap = Number(listing?.hours) || 0;
+  const crewCap = Number(listing?.crew) || 0;
+  const crewCount = Math.max(1, Number(form.crew) || 1);
+  const hoursOverCap = hoursCap > 0 && schedule.some((d) => d.hours > hoursCap);
+  const crewOverCap = crewCap > 0 && crewCount > crewCap;
 
   const pricing = useMemo(
     () => (listing ? priceBooking(listing.price, totalHours) : null),
@@ -97,6 +112,7 @@ export function BookingUIProvider({ children }) {
   );
 
   const update = (patch) => setForm((f) => ({ ...f, ...patch }));
+  const setDayHours = (date, value) => update({ hoursByDate: { ...form.hoursByDate, [date]: value } });
 
   // Switching modes keeps a sensible date range (at least 2 days when going multi-day).
   const setMode = (mode) => {
@@ -118,14 +134,32 @@ export function BookingUIProvider({ children }) {
 
   const datesValid =
     form.date && form.date >= todayISO() && (form.mode === "single" || (form.endDate && form.endDate >= form.date));
-  const detailsValid = datesValid && form.name.trim() && /\S+@\S+\.\S+/.test(form.email) && hoursPerDay >= 1 && Number(form.crew) >= 1;
+  const detailsValid =
+    datesValid &&
+    form.name.trim() &&
+    /\S+@\S+\.\S+/.test(form.email) &&
+    hoursPerDay >= 1 &&
+    crewCount >= 1 &&
+    !hoursOverCap &&
+    !crewOverCap;
 
   const cardDigits = form.cardNumber.replace(/\D/g, "");
   const paymentValid = form.cardName.trim() && cardDigits.length >= 15 && /^\d{2}\s*\/\s*\d{2}$/.test(form.expiry) && /^\d{3,4}$/.test(form.cvc);
 
+  // Shown live (as the user types) when a cap is exceeded.
+  const capError = hoursOverCap
+    ? `This space allows up to ${hoursCap} hours per day. Please lower the hours to continue.`
+    : crewOverCap
+    ? `This space fits up to ${crewCap} crew/guests. Please reduce your crew size to continue.`
+    : "";
+
   const goToPayment = () => {
     if (!datesValid) {
       setError("Pick valid dates — for a multi-day booking the end date must be on or after the start date.");
+      return;
+    }
+    if (capError) {
+      // The live warning already explains the limit; just don't advance.
       return;
     }
     if (!detailsValid) {
@@ -147,6 +181,7 @@ export function BookingUIProvider({ children }) {
     const summary = createBooking(listing, {
       ...form,
       endDate: form.mode === "range" ? form.endDate : form.date,
+      schedule,
       cardBrand: detectBrand(form.cardNumber),
       last4: cardDigits.slice(-4),
     });
@@ -185,7 +220,7 @@ export function BookingUIProvider({ children }) {
                   <div className="price-breakdown">
                     {days > 1 && (
                       <div>
-                        <span>{days} days × {hoursPerDay} hrs/day</span>
+                        <span>{days} days scheduled</span>
                         <span>{totalHours} hrs</span>
                       </div>
                     )}
@@ -237,13 +272,15 @@ export function BookingUIProvider({ children }) {
                         Start time
                         <input type="time" value={form.startTime} step="1800" onChange={(e) => update({ startTime: e.target.value })} />
                       </label>
-                      <label>
+                      <label className={hoursOverCap ? "field-error" : ""}>
                         Hours
-                        <input type="number" min="1" max="24" value={form.hours} onChange={(e) => update({ hours: e.target.value })} />
+                        <input type="number" min="1" max={hoursCap || 24} value={form.hours} onChange={(e) => update({ hours: e.target.value })} />
+                        {hoursCap > 0 && <small className={`field-hint ${hoursOverCap ? "over" : ""}`}>Up to {hoursCap} hrs / day</small>}
                       </label>
-                      <label>
+                      <label className={crewOverCap ? "field-error" : ""}>
                         Crew / guests
-                        <input type="number" min="1" max={listing.crew || 200} value={form.crew} onChange={(e) => update({ crew: e.target.value })} />
+                        <input type="number" min="1" max={crewCap || 200} value={form.crew} onChange={(e) => update({ crew: e.target.value })} />
+                        {crewCap > 0 && <small className={`field-hint ${crewOverCap ? "over" : ""}`}>Fits up to {crewCap}</small>}
                       </label>
                     </div>
                   ) : (
@@ -258,22 +295,42 @@ export function BookingUIProvider({ children }) {
                           <input type="date" min={form.date} value={form.endDate} onChange={(e) => update({ endDate: e.target.value })} />
                         </label>
                       </div>
-                      <div className="grid-2">
-                        <label>
-                          Start time / day
-                          <input type="time" value={form.startTime} step="1800" onChange={(e) => update({ startTime: e.target.value })} />
-                        </label>
-                        <label>
-                          Hours per day
-                          <input type="number" min="1" max="24" value={form.hours} onChange={(e) => update({ hours: e.target.value })} />
-                        </label>
-                      </div>
                       <label>
+                        Start time (each day)
+                        <input type="time" value={form.startTime} step="1800" onChange={(e) => update({ startTime: e.target.value })} />
+                      </label>
+
+                      <div className="day-schedule">
+                        <div className="day-schedule__head">
+                          <span>Hours per day</span>
+                          {hoursCap > 0 && <small className={`field-hint ${hoursOverCap ? "over" : ""}`}>Up to {hoursCap} hrs / day</small>}
+                        </div>
+                        {schedule.map(({ date, hours }) => {
+                          const over = hoursCap > 0 && hours > hoursCap;
+                          return (
+                            <div className={`day-row ${over ? "over" : ""}`} key={date}>
+                              <span className="day-row__date">{shortDate(date)}</span>
+                              <span className="day-row__time">{form.startTime}–{addHoursToTime(form.startTime, hours)}</span>
+                              <input
+                                type="number"
+                                min="1"
+                                max={hoursCap || 24}
+                                value={form.hoursByDate?.[date] ?? form.hours}
+                                onChange={(e) => setDayHours(date, e.target.value)}
+                                aria-label={`Hours on ${shortDate(date)}`}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <label className={crewOverCap ? "field-error" : ""}>
                         Crew / guests
-                        <input type="number" min="1" max={listing.crew || 200} value={form.crew} onChange={(e) => update({ crew: e.target.value })} />
+                        <input type="number" min="1" max={crewCap || 200} value={form.crew} onChange={(e) => update({ crew: e.target.value })} />
+                        {crewCap > 0 && <small className={`field-hint ${crewOverCap ? "over" : ""}`}>Fits up to {crewCap}</small>}
                       </label>
                       <p className="range-summary">
-                        <strong>{days} {days === 1 ? "day" : "days"}</strong> · {hoursPerDay} hrs each ({form.startTime}–{endTime}) · <strong>{totalHours} hrs total</strong>
+                        <strong>{days} {days === 1 ? "day" : "days"}</strong> scheduled · <strong>{totalHours} hrs total</strong>
                       </p>
                     </>
                   )}
@@ -289,8 +346,9 @@ export function BookingUIProvider({ children }) {
                     Notes for the host (optional)
                     <textarea rows="2" placeholder="What are you shooting?" value={form.notes} onChange={(e) => update({ notes: e.target.value })} />
                   </label>
-                  {error && <p className="booking-error">{error}</p>}
-                  <button className="primary-button block" type="button" onClick={goToPayment}>
+                  {capError && <p className="booking-error">{capError}</p>}
+                  {error && !capError && <p className="booking-error">{error}</p>}
+                  <button className="primary-button block" type="button" onClick={goToPayment} disabled={!!capError}>
                     Continue to payment
                   </button>
                 </div>
@@ -344,6 +402,13 @@ export function BookingUIProvider({ children }) {
                     {processing ? "Processing…" : `Pay ${money(pricing.total)}`}
                   </button>
                   <p className="muted small center">Secured by Stripe · You won't be charged in test mode.</p>
+                  <p className="muted small center">
+                    By paying you agree to the{" "}
+                    <a href="#/terms" target="_blank" rel="noreferrer">
+                      Terms &amp; Refund Policy
+                    </a>
+                    .
+                  </p>
                 </div>
               )}
 
@@ -363,18 +428,18 @@ export function BookingUIProvider({ children }) {
                       <strong>{result.days > 1 ? result.days : result.crew}</strong>
                     </div>
                     <div>
-                      <span>{result.days > 1 ? "Hrs / day" : "Hours"}</span>
-                      <strong>{result.days > 1 ? result.hoursPerDay : result.hours}</strong>
+                      <span>{result.days > 1 ? "Total hrs" : "Hours"}</span>
+                      <strong>{result.hours}</strong>
                     </div>
                     <div>
                       <span>Total paid</span>
                       <strong>{money(result.total)}</strong>
                     </div>
                   </div>
-                  <p className="muted small">A confirmation was sent to {form.email}. This booking now appears under Admin → Bookings, Active, Payments, Payouts, and the Calendar.</p>
+                  <p className="muted small">A confirmation was sent to {form.email}. You can view this booking any time under My Bookings.</p>
                   <div className="success-actions">
-                    <a className="primary-button" href="#/admin" onClick={closeBooking}>
-                      View in admin
+                    <a className="primary-button" href="#/bookings" onClick={closeBooking}>
+                      View my booking
                     </a>
                     <button className="ghost-button" type="button" onClick={closeBooking}>
                       Done

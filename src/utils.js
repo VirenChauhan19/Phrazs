@@ -19,6 +19,14 @@ export function prettyDate(iso) {
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
 }
 
+// Compact date label, e.g. "Mon, Jun 1".
+export function shortDate(iso) {
+  if (!iso) return "";
+  const d = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+}
+
 // Inclusive number of days between two YYYY-MM-DD strings (min 1).
 // "2026-06-01" → "2026-06-03" returns 3.
 export function dayCount(startISO, endISO) {
