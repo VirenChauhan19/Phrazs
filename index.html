@@ -159,7 +159,7 @@
         <div class="admin-lock" id="adminLock">
           <p class="eyebrow">Owner Only</p>
           <h2 id="adminTitle">Admin Dashboard</h2>
-          <p>This tab is separate from the public site. Sign in with the configured owner email to view extracted site data, property records, hosts, blog posts, inquiries, and export tools.</p>
+          <p>This tab is separate from the public site. Sign in with the configured owner email to view listings, hosts, users, bookings, active and completed jobs, payments, payouts, calendar, inquiries, media, and export tools.</p>
           <form id="adminLogin" class="admin-login">
             <label>Owner email<input type="email" id="adminEmail" placeholder="contact@phrazs.com" required></label>
             <label>Admin passcode<input type="password" id="adminPasscode" placeholder="Owner passcode" required></label>
@@ -171,7 +171,7 @@
           <div class="admin-topbar">
             <div>
               <p class="eyebrow">Admin</p>
-              <h2>Extracted Phrazs Data</h2>
+              <h2>Phrazs Admin Console</h2>
             </div>
             <div class="admin-actions">
               <button class="ghost-button" id="downloadData" type="button">Export JSON</button>
@@ -180,7 +180,15 @@
           </div>
           <div class="metric-grid" id="metricGrid"></div>
           <div class="admin-tabs" role="tablist" aria-label="Admin data">
-            <button class="active" type="button" data-admin-tab="listings">Listings</button>
+            <button class="active" type="button" data-admin-tab="overview">Overview</button>
+            <button type="button" data-admin-tab="bookings">Bookings</button>
+            <button type="button" data-admin-tab="active">Active</button>
+            <button type="button" data-admin-tab="completed">Completed</button>
+            <button type="button" data-admin-tab="payments">Payments</button>
+            <button type="button" data-admin-tab="payouts">Payouts</button>
+            <button type="button" data-admin-tab="calendar">Calendar</button>
+            <button type="button" data-admin-tab="users">Users</button>
+            <button type="button" data-admin-tab="listings">Listings</button>
             <button type="button" data-admin-tab="hosts">Hosts</button>
             <button type="button" data-admin-tab="media">Media</button>
             <button type="button" data-admin-tab="content">Content</button>

@@ -5,7 +5,7 @@ const state = {
   query: "",
   category: "All",
   sort: "featured",
-  adminTab: "listings"
+  adminTab: "overview"
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -151,11 +151,17 @@ function renderMedia() {
 
 function renderMetrics() {
   const totalValue = data.listings.reduce((sum, item) => sum + (item.price || 0), 0);
+  const paidGross = data.payments.reduce((sum, item) => sum + (item.gross || 0), 0);
+  const activeBookings = data.bookings.filter((item) => ["Active", "Confirmed", "Pending Payment"].includes(item.status)).length;
+  const completedBookings = data.bookings.filter((item) => item.status === "Completed").length;
   const stats = [
     ["Listings", data.listings.length],
     ["Hosts", data.hosts.length],
+    ["Users", data.users.length],
+    ["Active", activeBookings],
+    ["Completed", completedBookings],
+    ["Payment Gross", money(paidGross)],
     ["Avg. Price", money(Math.round(totalValue / data.listings.length))],
-    ["Blog Posts", data.blog.length],
     ["Images", media.length]
   ];
   byId("metricGrid").innerHTML = stats.map(([label, value]) => `
@@ -185,6 +191,122 @@ function adminTable(items, columns) {
 
 function renderAdminPanel() {
   const panel = byId("adminPanel");
+  if (state.adminTab === "overview") {
+    const upcoming = data.bookings.filter((item) => item.status !== "Completed");
+    panel.innerHTML = `
+      <div class="admin-overview">
+        <article>
+          <h3>Booking Structure</h3>
+          <ul>${data.bookingStructure.statuses.map((item) => `<li>${item}</li>`).join("")}</ul>
+        </article>
+        <article>
+          <h3>Payment Structure</h3>
+          <ul>${data.bookingStructure.paymentFields.map((item) => `<li>${item}</li>`).join("")}</ul>
+        </article>
+        <article>
+          <h3>Calendar Rules</h3>
+          <ul>${data.bookingStructure.calendarRules.map((item) => `<li>${item}</li>`).join("")}</ul>
+        </article>
+      </div>
+      <h3 class="panel-heading">Upcoming Work</h3>
+      ${adminTable(upcoming, [
+        { label: "Booking", render: (item) => `<strong>${item.id}</strong><small>${item.property}</small>` },
+        { label: "Guest", render: (item) => `${item.guest}<small>${item.guestEmail}</small>` },
+        { label: "Host", render: (item) => item.host },
+        { label: "Date", render: (item) => `${item.date}<small>${item.start} - ${item.end}</small>` },
+        { label: "Status", render: (item) => `<span class="status">${item.status}</span>` },
+        { label: "Payment", render: (item) => `<span class="status">${item.paymentStatus}</span>` },
+        { label: "Total", render: (item) => money(item.total) }
+      ])}
+    `;
+  }
+  if (state.adminTab === "bookings") {
+    panel.innerHTML = adminTable(data.bookings, [
+      { label: "Booking", render: (item) => `<strong>${item.id}</strong><small>${item.property}</small>` },
+      { label: "Guest", render: (item) => `${item.guest}<small>${item.guestEmail}</small>` },
+      { label: "Host", render: (item) => item.host },
+      { label: "Schedule", render: (item) => `${item.start}<small>${item.end}</small>` },
+      { label: "Crew", render: (item) => item.crew },
+      { label: "Hours", render: (item) => item.hours },
+      { label: "Status", render: (item) => `<span class="status">${item.status}</span>` },
+      { label: "Payment", render: (item) => `<span class="status">${item.paymentStatus}</span>` },
+      { label: "Total", render: (item) => money(item.total) },
+      { label: "Notes", render: (item) => item.notes }
+    ]);
+  }
+  if (state.adminTab === "active") {
+    const active = data.bookings.filter((item) => ["Active", "Confirmed", "Pending Payment"].includes(item.status));
+    panel.innerHTML = adminTable(active, [
+      { label: "Booking", render: (item) => `<strong>${item.id}</strong><small>${item.property}</small>` },
+      { label: "Date", render: (item) => item.date },
+      { label: "Status", render: (item) => `<span class="status">${item.status}</span>` },
+      { label: "Payment", render: (item) => `<span class="status">${item.paymentStatus}</span>` },
+      { label: "Guest", render: (item) => item.guest },
+      { label: "Host", render: (item) => item.host },
+      { label: "Host Payout", render: (item) => money(item.hostPayout) },
+      { label: "Total", render: (item) => money(item.total) }
+    ]);
+  }
+  if (state.adminTab === "completed") {
+    const completed = data.bookings.filter((item) => item.status === "Completed");
+    panel.innerHTML = adminTable(completed, [
+      { label: "Booking", render: (item) => `<strong>${item.id}</strong><small>${item.property}</small>` },
+      { label: "Completed", render: (item) => item.date },
+      { label: "Guest", render: (item) => item.guest },
+      { label: "Host", render: (item) => item.host },
+      { label: "Payment", render: (item) => `<span class="status">${item.paymentStatus}</span>` },
+      { label: "Platform Fee", render: (item) => money(item.platformFee) },
+      { label: "Host Payout", render: (item) => money(item.hostPayout) },
+      { label: "Total", render: (item) => money(item.total) }
+    ]);
+  }
+  if (state.adminTab === "payments") {
+    panel.innerHTML = adminTable(data.payments, [
+      { label: "Payment", render: (item) => `<strong>${item.id}</strong><small>${item.bookingId}</small>` },
+      { label: "Processor", render: (item) => item.processor },
+      { label: "Method", render: (item) => `${item.method}<small>${item.cardBrand} ending ${item.last4}</small>` },
+      { label: "Gross", render: (item) => money(item.gross) },
+      { label: "Fees", render: (item) => money(item.fees) },
+      { label: "Net", render: (item) => money(item.net) },
+      { label: "Refunded", render: (item) => money(item.refunded) },
+      { label: "Status", render: (item) => `<span class="status">${item.status}</span>` },
+      { label: "Captured", render: (item) => item.capturedAt }
+    ]);
+  }
+  if (state.adminTab === "payouts") {
+    panel.innerHTML = adminTable(data.payouts, [
+      { label: "Payout", render: (item) => `<strong>${item.id}</strong><small>${item.bookingId}</small>` },
+      { label: "Host", render: (item) => item.host },
+      { label: "Amount", render: (item) => money(item.amount) },
+      { label: "Status", render: (item) => `<span class="status">${item.status}</span>` },
+      { label: "Payout Date", render: (item) => item.payoutDate }
+    ]);
+  }
+  if (state.adminTab === "calendar") {
+    panel.innerHTML = `
+      <div class="calendar-grid">
+        ${data.calendar.map((item) => `
+          <article class="calendar-card">
+            <span>${item.date}</span>
+            <strong>${item.property}</strong>
+            <p>${item.time}</p>
+            <em>${item.status}${item.bookingId ? ` | ${item.bookingId}` : ""}</em>
+          </article>
+        `).join("")}
+      </div>
+    `;
+  }
+  if (state.adminTab === "users") {
+    panel.innerHTML = adminTable(data.users, [
+      { label: "User", render: (item) => `<strong>${item.name}</strong><small>${item.id}</small>` },
+      { label: "Email", render: (item) => `<a href="mailto:${item.email}">${item.email}</a>` },
+      { label: "Role", render: (item) => item.role },
+      { label: "Status", render: (item) => `<span class="status">${item.status}</span>` },
+      { label: "Joined", render: (item) => item.joined },
+      { label: "Bookings", render: (item) => item.bookings },
+      { label: "Lifetime Value", render: (item) => money(item.lifetimeValue) }
+    ]);
+  }
   if (state.adminTab === "listings") {
     panel.innerHTML = adminTable(data.listings, [
       { label: "Listing", render: (item) => `<strong>${item.title}</strong><small>${item.id}</small>` },
@@ -218,6 +340,10 @@ function renderAdminPanel() {
     panel.innerHTML = `
       <div class="content-columns">
         <article>
+          <h3>Booking Structure</h3>
+          <pre>${JSON.stringify(data.bookingStructure, null, 2)}</pre>
+        </article>
+        <article>
           <h3>Brand</h3>
           <pre>${JSON.stringify(data.brand, null, 2)}</pre>
         </article>
@@ -247,7 +373,7 @@ function renderAdminPanel() {
     ]);
   }
   if (state.adminTab === "raw") {
-    panel.innerHTML = `<pre class="raw-data">${JSON.stringify(data, null, 2)}</pre>`;
+    panel.innerHTML = `<pre class="raw-data">${JSON.stringify({ ...data, mediaLibrary: media }, null, 2)}</pre>`;
   }
 }
 
