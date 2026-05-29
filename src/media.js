@@ -1,4 +1,4 @@
-window.PHRAZS_MEDIA = [
+export const PHRAZS_MEDIA = [
   { page: "Home", url: "https://phrazs.com/wp-content/uploads/2025/12/home-slider-1.jpeg" },
   { page: "Home", url: "https://phrazs.com/wp-content/uploads/2025/12/home-slider-2-scaled.jpeg" },
   { page: "Brand", url: "https://phrazs.com/wp-content/uploads/2023/12/cropped-site_logo.png" },
@@ -121,5 +121,13 @@ window.PHRAZS_MEDIA = [
   { page: "Older listings", url: "https://phrazs.com/wp-content/uploads/2021/09/image-18.jpg" },
   { page: "Older listings", url: "https://phrazs.com/wp-content/uploads/2021/09/image-18-400x300.jpg" },
   { page: "Older listings", url: "https://phrazs.com/wp-content/uploads/2021/09/image-19.jpg" },
-  { page: "Older listings", url: "https://phrazs.com/wp-content/uploads/2021/09/image-19-400x300.jpg" }
+  { page: "Older listings", url: "https://phrazs.com/wp-content/uploads/2021/09/image-19-400x300.jpg" },
 ];
+
+// Group media URLs by their page/listing name so detail pages can build galleries.
+export const mediaByPage = PHRAZS_MEDIA.reduce((acc, item) => {
+  (acc[item.page] = acc[item.page] || []).push(item.url);
+  return acc;
+}, {});
+
+export default PHRAZS_MEDIA;
