@@ -41,7 +41,7 @@ export default function Terms() {
         <div className="legal-body">
           <div id="highlights" className="legal-highlights">
             <h3>The short version</h3>
-            <p className="muted">A plain-language summary — the full terms below control if there's any conflict.</p>
+            <p className="muted">A plain-language summary - the full terms below control if there's any conflict.</p>
             <ul>
               {t.highlights.map((h, i) => (
                 <li key={i}>{h}</li>

@@ -464,7 +464,7 @@ export const PHRAZS_DATA = {
     highlights: [
       "Phrazs is a marketplace that connects Guests with Hosts who list spaces for shoots, events, and productions. Phrazs does not own, manage, or operate the spaces.",
       "When you book, you enter a direct agreement with the Host and agree to that listing's House Rules, hours, and crew limits.",
-      "Each listing shows a cancellation policy — Flexible, Standard, or Strict — that determines your refund.",
+      "Each listing shows a cancellation policy - Flexible, Standard, or Strict - that determines your refund.",
       "The 15% service fee is refundable within 24 hours of booking (if your start time is 48+ hours away), if the Host cancels, or under Extenuating Circumstances.",
       "Payments are processed securely by our payment partner. Never pay or accept payment outside of Phrazs.",
     ],
@@ -472,20 +472,20 @@ export const PHRAZS_DATA = {
       {
         name: "Flexible",
         full: "Cancel 24+ hours before start",
-        partial: "—",
+        partial: "-",
         none: "Less than 24 hours before start",
         usedFor: "Guests who may need to adjust plans.",
       },
       {
         name: "Standard (default)",
         full: "7+ days before start",
-        partial: "48 hours–7 days before start (50%)",
+        partial: "48 hours-7 days before start (50%)",
         none: "Less than 48 hours before start",
         usedFor: "Applies unless the Host selects another policy.",
       },
       {
         name: "Strict",
-        full: "—",
+        full: "-",
         partial: "14+ days before start (50%)",
         none: "Less than 14 days before start",
         usedFor: "High-demand spaces and large productions.",
@@ -531,11 +531,11 @@ export const PHRAZS_DATA = {
         id: "cancellation",
         title: "5. Cancellation & Refund Policy",
         paragraphs: [
-          "Every listing displays one of three cancellation policies — Flexible, Standard, or Strict — summarized in the table below. The refund of the space fee depends on how far before your start time you cancel.",
+          "Every listing displays one of three cancellation policies - Flexible, Standard, or Strict - summarized in the table below. The refund of the space fee depends on how far before your start time you cancel.",
           "Service fee: The 15% service fee is non-refundable, except (a) when you cancel within 24 hours of booking and your start time is at least 48 hours away, (b) when the Host cancels, or (c) under the Extenuating Circumstances policy.",
           "Host cancellations: If a Host cancels a confirmed booking, the Guest receives a 100% refund including the service fee, and we will help you find a comparable space where possible. Repeated Host cancellations may lead to penalties or removal.",
           "Extenuating Circumstances: If a serious event outside your control (for example, a natural disaster, government order, or other major emergency) makes it unsafe or impossible to use a space, you may request a full refund. We may ask for documentation.",
-          "How refunds work: Approved refunds are issued to your original payment method, typically within 5–10 business days depending on your bank. To cancel, open the booking under My Bookings or contact us at the email below before your start time. Initiating a chargeback instead of requesting a refund through Phrazs may delay resolution and result in account suspension.",
+          "How refunds work: Approved refunds are issued to your original payment method, typically within 5-10 business days depending on your bank. To cancel, open the booking under My Bookings or contact us at the email below before your start time. Initiating a chargeback instead of requesting a refund through Phrazs may delay resolution and result in account suspension.",
         ],
       },
       {
@@ -543,8 +543,8 @@ export const PHRAZS_DATA = {
         title: "6. Damage, Security Deposits & Resolution",
         paragraphs: [
           "Spaces are offered for short-term creative use only. No tenancy, lease, or residential occupancy is created by a booking, and you have no right to remain in a space beyond your booked time.",
-          "A listing may require a refundable security deposit or a temporary authorization hold on the Guest's payment method. If a Guest (or its crew, guests, or invitees) causes damage beyond normal wear, leaves the space requiring excessive cleaning, or overstays, the Host may submit a claim with reasonable supporting evidence — such as photos, receipts, or repair estimates — within 14 days after the booking ends.",
-          "After reviewing the claim, Phrazs may charge the Guest's payment method for the substantiated amount and remit it to the Host. Phrazs's handling of a damage claim is a billing decision to facilitate the Host–Guest contract, not a legal determination of fault, and does not limit either party's other rights.",
+          "A listing may require a refundable security deposit or a temporary authorization hold on the Guest's payment method. If a Guest (or its crew, guests, or invitees) causes damage beyond normal wear, leaves the space requiring excessive cleaning, or overstays, the Host may submit a claim with reasonable supporting evidence - such as photos, receipts, or repair estimates - within 14 days after the booking ends.",
+          "After reviewing the claim, Phrazs may charge the Guest's payment method for the substantiated amount and remit it to the Host. Phrazs's handling of a damage claim is a billing decision to facilitate the Host-Guest contract, not a legal determination of fault, and does not limit either party's other rights.",
         ],
       },
       {
@@ -583,7 +583,7 @@ export const PHRAZS_DATA = {
         id: "ip",
         title: "11. Phrazs Intellectual Property",
         paragraphs: [
-          "The Phrazs name, logo, and platform — including its software, design, text, and graphics (excluding user content) — are owned by Phrazs or its licensors and protected by intellectual-property laws. We grant you a limited, revocable, non-transferable license to access and use the platform for its intended purpose.",
+          "The Phrazs name, logo, and platform - including its software, design, text, and graphics (excluding user content) - are owned by Phrazs or its licensors and protected by intellectual-property laws. We grant you a limited, revocable, non-transferable license to access and use the platform for its intended purpose.",
           "You may not copy, modify, distribute, sell, or create derivative works from the platform, or use Phrazs's trademarks or branding, without our prior written permission.",
         ],
       },
@@ -629,21 +629,21 @@ export const PHRAZS_DATA = {
         title: "16. Privacy & Data",
         paragraphs: [
           "Your use of Phrazs is also governed by how we handle personal data. The platform is operated and hosted in the United States; by using it you consent to the transfer, storage, and processing of your information in the United States.",
-          "We collect and use the information needed to run the marketplace — such as account, booking, and payment details — and share it with Hosts, Guests, and service providers (like our payment processor) only as needed to provide the service or as required by law. We do not sell your personal information.",
+          "We collect and use the information needed to run the marketplace - such as account, booking, and payment details - and share it with Hosts, Guests, and service providers (like our payment processor) only as needed to provide the service or as required by law. We do not sell your personal information.",
         ],
       },
       {
         id: "communications",
         title: "17. Electronic Communications & Notices",
         paragraphs: [
-          "By creating an account or making a booking, you agree to receive communications from Phrazs and other users electronically — including booking confirmations, receipts, service messages, and legal notices — at the email address or through the messaging tools associated with your account, and you agree that these satisfy any legal requirement that such communications be in writing.",
+          "By creating an account or making a booking, you agree to receive communications from Phrazs and other users electronically - including booking confirmations, receipts, service messages, and legal notices - at the email address or through the messaging tools associated with your account, and you agree that these satisfy any legal requirement that such communications be in writing.",
         ],
       },
       {
         id: "changes",
         title: "18. Changes, Suspension & Termination",
         paragraphs: [
-          "We may update these Terms from time to time; material changes will be posted here with a new \"Last updated\" date, and continued use means you accept them. You may stop using Phrazs at any time. We may suspend or terminate accounts that violate these Terms or create risk for the community. Sections that by their nature should survive termination — such as payment obligations, content licenses, disclaimers, liability limits, indemnification, and dispute resolution — continue to apply.",
+          "We may update these Terms from time to time; material changes will be posted here with a new \"Last updated\" date, and continued use means you accept them. You may stop using Phrazs at any time. We may suspend or terminate accounts that violate these Terms or create risk for the community. Sections that by their nature should survive termination - such as payment obligations, content licenses, disclaimers, liability limits, indemnification, and dispute resolution - continue to apply.",
         ],
       },
       {

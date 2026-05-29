@@ -14,7 +14,7 @@ export default function MyBookings() {
         <h2>My Bookings</h2>
         <p className="lead">You haven't booked a space yet. When you do, your confirmation and details show up right here.</p>
         <div className="empty-state" style={{ display: "grid", gap: 16, justifyItems: "start" }}>
-          <p style={{ margin: 0 }}>Browse spaces and book one in a couple of taps — no account required.</p>
+          <p style={{ margin: 0 }}>Browse spaces and book one in a couple of taps - no account required.</p>
           <Link className="primary-button" to="/explore">
             Explore spaces
           </Link>
@@ -66,7 +66,7 @@ export default function MyBookings() {
                   </div>
                   <div>
                     <span>{multiDay ? "Days" : "Time"}</span>
-                    <strong>{multiDay ? `${b.days} days` : `${b.start.slice(-5)}–${b.end.slice(-5)}`}</strong>
+                    <strong>{multiDay ? `${b.days} days` : `${b.start.slice(-5)}-${b.end.slice(-5)}`}</strong>
                   </div>
                   <div>
                     <span>{multiDay ? "Total hrs" : "Hours"}</span>

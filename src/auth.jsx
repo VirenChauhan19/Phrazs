@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
       try {
         sessionStorage.setItem(STORAGE_KEY, "true");
       } catch {
-        /* sessionStorage unavailable — keep in-memory */
+        /* sessionStorage unavailable - keep in-memory */
       }
       setIsAdmin(true);
     }

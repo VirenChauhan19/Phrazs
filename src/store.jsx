@@ -60,7 +60,7 @@ export function StoreProvider({ children }) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     } catch {
-      /* storage full or unavailable — keep working in-memory */
+      /* storage full or unavailable - keep working in-memory */
     }
   }, [records]);
 

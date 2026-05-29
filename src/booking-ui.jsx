@@ -156,7 +156,7 @@ export function BookingUIProvider({ children }) {
 
   const goToPayment = () => {
     if (!datesValid) {
-      setError("Pick valid dates — for a multi-day booking the end date must be on or after the start date.");
+      setError("Pick valid dates - for a multi-day booking the end date must be on or after the start date.");
       return;
     }
     if (capError) {
@@ -193,7 +193,7 @@ export function BookingUIProvider({ children }) {
     setResult(summary);
     setProcessing(false);
     setStep("success");
-    showToast(`Booking confirmed for ${listing.title} — it's now live in the Admin dashboard.`);
+    showToast(`Booking confirmed for ${listing.title} - it's now live in the Admin dashboard.`);
   };
 
   const value = useMemo(() => ({ openBooking, showToast }), [openBooking, showToast]);
@@ -315,7 +315,7 @@ export function BookingUIProvider({ children }) {
                           return (
                             <div className={`day-row ${over ? "over" : ""}`} key={date}>
                               <span className="day-row__date">{shortDate(date)}</span>
-                              <span className="day-row__time">{form.startTime}–{addHoursToTime(form.startTime, hours)}</span>
+                              <span className="day-row__time">{form.startTime}-{addHoursToTime(form.startTime, hours)}</span>
                               <input
                                 type="number"
                                 min="1"
@@ -365,7 +365,7 @@ export function BookingUIProvider({ children }) {
                     ← Back to details
                   </button>
                   <h2>Payment</h2>
-                  <p className="muted small">Test mode — use card 4242 4242 4242 4242, any future expiry, any CVC.</p>
+                  <p className="muted small">Test mode - use card 4242 4242 4242 4242, any future expiry, any CVC.</p>
                   <label>
                     Name on card
                     <input type="text" placeholder="Jordan Cole" value={form.cardName} onChange={(e) => update({ cardName: e.target.value })} />
@@ -428,7 +428,7 @@ export function BookingUIProvider({ children }) {
                     {listing.title} ·{" "}
                     {result.days > 1
                       ? `${prettyDate(result.date)} → ${prettyDate(result.endDate)}`
-                      : `${prettyDate(result.date)} · ${result.startTime}–${result.endTime}`}
+                      : `${prettyDate(result.date)} · ${result.startTime}-${result.endTime}`}
                   </p>
                   <div className="success-summary">
                     <div>

@@ -85,7 +85,7 @@ h3 { font-size: 1.18rem; font-weight: 600; letter-spacing: -0.01em; }
 .center { text-align: center; }
 .lead { max-width: 720px; color: var(--ink-soft); font-size: 1.08rem; line-height: 1.6; margin: 6px 0 26px; }
 
-/* Editorial mono label with a leading rule — used site-wide as the "eyebrow" */
+/* Editorial mono label with a leading rule - used site-wide as the "eyebrow" */
 .eyebrow {
   margin: 0 0 14px;
   color: var(--accent-dark);
@@ -908,7 +908,7 @@ table.clickable tbody tr:focus-visible { outline: 2px solid #2271b1; outline-off
 .route-transition { animation: route-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 @keyframes route-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-/* Scroll reveal — elements get `.reveal` from JS, then `.in-view` as they enter */
+/* Scroll reveal - elements get `.reveal` from JS, then `.in-view` as they enter */
 .reveal {
   opacity: 0;
   transform: translateY(28px);

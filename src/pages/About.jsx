@@ -14,7 +14,7 @@ export default function About() {
     submitInquiry({ ...form, interest: form.subject });
     setSent(true);
     setForm({ name: "", email: "", subject: "", message: "" });
-    showToast("Message sent — it now appears in Admin → Inquiries.");
+    showToast("Message sent - it now appears in Admin → Inquiries.");
   };
 
   const featuredMedia = media.filter((m) => !m.url.includes("-32x32") && !m.url.includes("-180x180")).slice(0, 12);

@@ -76,7 +76,7 @@ function BookingDetail({ booking, listing, payment, payout, calendar, onClose })
             <span className="status">{booking.id}</span>
             <h2>{booking.property}</h2>
             <p className="muted">
-              {multiDay ? `${booking.date} → ${booking.endDate}` : `${booking.start} – ${booking.end}`}
+              {multiDay ? `${booking.date} → ${booking.endDate}` : `${booking.start} - ${booking.end}`}
             </p>
           </div>
           <button className="modal-close" type="button" onClick={onClose} aria-label="Close">
@@ -375,7 +375,7 @@ export default function Admin() {
                       { label: "Booking", render: (b) => (<><strong>{b.id}</strong><small>{b.property}</small></>) },
                       { label: "Guest", render: (b) => (<>{b.guest}<small>{b.guestEmail}</small></>) },
                       { label: "Host", render: (b) => b.host },
-                      { label: "Date", render: (b) => (<>{b.date}<small>{b.start} – {b.end}</small></>) },
+                      { label: "Date", render: (b) => (<>{b.date}<small>{b.start} - {b.end}</small></>) },
                       { label: "Status", render: (b) => <Status>{b.status}</Status> },
                       { label: "Payment", render: (b) => <Status>{b.paymentStatus}</Status> },
                       { label: "Total", render: (b) => money(b.total) },
@@ -505,7 +505,7 @@ export default function Admin() {
                   columns={[
                     { label: "Listing", render: (l) => (<><strong>{l.title}</strong><small>{l.id}</small></>) },
                     { label: "Category", render: (l) => l.category },
-                    { label: "City", render: (l) => l.city || "—" },
+                    { label: "City", render: (l) => l.city || "-" },
                     { label: "Price", render: (l) => l.priceLabel },
                     { label: "Space", render: (l) => (l.sqft ? l.sqft.toLocaleString() : "N/A") },
                     { label: "Crew", render: (l) => l.crew || "N/A" },
