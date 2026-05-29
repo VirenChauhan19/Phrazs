@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 import PHRAZS_DATA from "./data.js";
 import PHRAZS_MEDIA from "./media.js";
+import { dayCount, dateRange } from "./utils.js";
 
 const STORAGE_KEY = "phrazs_user_records_v1";
 const PLATFORM_RATE = 0.15; // service fee charged to guest / commission used for payout split
@@ -77,12 +78,15 @@ export function StoreProvider({ children }) {
   }, [records.users]);
 
   const createBooking = useCallback((listing, form) => {
-    const hours = Math.max(1, Number(form.hours) || 1);
+    const hoursPerDay = Math.max(1, Number(form.hours) || 1);
     const crew = Math.max(1, Number(form.crew) || 1);
+    const date = form.date;
+    const endDate = form.endDate && form.endDate >= date ? form.endDate : date;
+    const days = dayCount(date, endDate);
+    const hours = hoursPerDay * days; // total billable hours across the stay
     const { subtotal, platformFee, hostPayout, total } = priceBooking(listing.price, hours);
     const startTime = form.startTime || "09:00";
-    const endTime = addHoursToTime(startTime, hours);
-    const date = form.date;
+    const endTime = addHoursToTime(startTime, hoursPerDay);
 
     setRecords((prev) => {
       const allBookings = [...prev.bookings, ...PHRAZS_DATA.bookings];
@@ -101,8 +105,11 @@ export function StoreProvider({ children }) {
         guestEmail: form.email,
         host: listing.host || "Phrazs host",
         start: `${date} ${startTime}`,
-        end: `${date} ${endTime}`,
+        end: `${endDate} ${endTime}`,
         date,
+        endDate,
+        days,
+        hoursPerDay,
         hours,
         crew,
         status: "Confirmed",
@@ -131,7 +138,7 @@ export function StoreProvider({ children }) {
         capturedAt: new Date().toISOString().slice(0, 16).replace("T", " "),
       };
 
-      const payoutDate = new Date(`${date}T00:00:00`);
+      const payoutDate = new Date(`${endDate}T00:00:00`);
       payoutDate.setDate(payoutDate.getDate() + 2);
       const payout = {
         id: payoutId,
@@ -142,13 +149,14 @@ export function StoreProvider({ children }) {
         payoutDate: payoutDate.toISOString().slice(0, 10),
       };
 
-      const calendarEntry = {
-        date,
+      // Block every day of the stay on the calendar, not just the first.
+      const calendarEntries = dateRange(date, endDate).map((day) => ({
+        date: day,
         property: listing.title,
         status: "Booked",
         bookingId,
         time: `${startTime}-${endTime}`,
-      };
+      }));
 
       // Add a guest user record only if this email is brand new.
       const knownEmails = new Set([
@@ -174,12 +182,12 @@ export function StoreProvider({ children }) {
         bookings: [booking, ...prev.bookings],
         payments: [payment, ...prev.payments],
         payouts: [payout, ...prev.payouts],
-        calendar: [calendarEntry, ...prev.calendar],
+        calendar: [...calendarEntries, ...prev.calendar],
         users: newUsers,
       };
     });
 
-    return { subtotal, platformFee, hostPayout, total, hours, crew, startTime, endTime, date };
+    return { subtotal, platformFee, hostPayout, total, hours, hoursPerDay, days, crew, startTime, endTime, date, endDate };
   }, []);
 
   const submitInquiry = useCallback((form) => {

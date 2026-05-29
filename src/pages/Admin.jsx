@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useStore } from "../store.jsx";
+import { useAuth } from "../auth.jsx";
 import { ADMIN_EMAIL, ADMIN_PASSCODE } from "../data.js";
 import { money } from "../utils.js";
 
@@ -51,8 +52,8 @@ const Status = ({ children }) => <span className="status">{children}</span>;
 export default function Admin() {
   const store = useStore();
   const { data, media, listings, hosts, bookings, payments, payouts, calendar, users, inquiries, userBookingCount, exportData, resetUserData } = store;
+  const { isAdmin, signIn, signOut } = useAuth();
 
-  const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem("phrazsAdminUnlocked") === "true");
   const [tab, setTab] = useState("overview");
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
@@ -77,9 +78,7 @@ export default function Admin() {
 
   const login = (e) => {
     e.preventDefault();
-    if (email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && pass === ADMIN_PASSCODE) {
-      sessionStorage.setItem("phrazsAdminUnlocked", "true");
-      setUnlocked(true);
+    if (signIn(email, pass)) {
       setError("");
     } else {
       setError("That email or passcode is not authorized for admin access.");
@@ -87,8 +86,7 @@ export default function Admin() {
   };
 
   const logout = () => {
-    sessionStorage.removeItem("phrazsAdminUnlocked");
-    setUnlocked(false);
+    signOut();
     setPass("");
   };
 
@@ -102,7 +100,7 @@ export default function Admin() {
     URL.revokeObjectURL(url);
   };
 
-  if (!unlocked) {
+  if (!isAdmin) {
     return (
       <section className="section admin-section">
         <div className="admin-lock">

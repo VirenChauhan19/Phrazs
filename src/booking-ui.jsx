@@ -1,6 +1,12 @@
 import { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useStore, priceBooking } from "./store.jsx";
-import { money, todayISO, prettyDate } from "./utils.js";
+import { money, todayISO, prettyDate, dayCount, addDays } from "./utils.js";
+
+function addHoursToTime(time, hours) {
+  const [h, m] = String(time || "09:00").split(":").map((v) => Number(v) || 0);
+  const endH = Math.min(h + (Number(hours) || 0), 23);
+  return `${String(endH).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
 
 const BookingUIContext = createContext(null);
 
@@ -16,10 +22,13 @@ function detectBrand(number) {
 function defaultForm(listing) {
   const t = new Date();
   t.setDate(t.getDate() + 1);
+  const start = t.toISOString().slice(0, 10);
   return {
-    date: t.toISOString().slice(0, 10),
+    mode: "single", // "single" = one day by the hour, "range" = multiple days
+    date: start,
+    endDate: start,
     startTime: "09:00",
-    hours: Math.min(Math.max(listing?.hours || 2, 1), 4) || 2,
+    hours: Math.min(Math.max(listing?.hours || 2, 1), 4) || 2, // hours per day
     crew: 1,
     name: "",
     email: "",
@@ -77,20 +86,48 @@ export function BookingUIProvider({ children }) {
     toastTimer.current = setTimeout(() => setToast(null), 4000);
   }, []);
 
+  const hoursPerDay = Math.max(1, Number(form.hours) || 1);
+  const days = form.mode === "range" ? dayCount(form.date, form.endDate) : 1;
+  const totalHours = hoursPerDay * days;
+  const endTime = addHoursToTime(form.startTime, hoursPerDay);
+
   const pricing = useMemo(
-    () => (listing ? priceBooking(listing.price, Math.max(1, Number(form.hours) || 1)) : null),
-    [listing, form.hours]
+    () => (listing ? priceBooking(listing.price, totalHours) : null),
+    [listing, totalHours]
   );
 
   const update = (patch) => setForm((f) => ({ ...f, ...patch }));
 
-  const detailsValid =
-    form.date && form.date >= todayISO() && form.name.trim() && /\S+@\S+\.\S+/.test(form.email) && Number(form.hours) >= 1 && Number(form.crew) >= 1;
+  // Switching modes keeps a sensible date range (at least 2 days when going multi-day).
+  const setMode = (mode) => {
+    setError("");
+    if (mode === "range") {
+      update({ mode, endDate: form.endDate && form.endDate > form.date ? form.endDate : addDays(form.date, 1) });
+    } else {
+      update({ mode, endDate: form.date });
+    }
+  };
+
+  // Keep the end date from drifting before the start date.
+  const changeStartDate = (value) => {
+    const patch = { date: value };
+    if (form.mode === "range" && (!form.endDate || form.endDate < value)) patch.endDate = value;
+    if (form.mode === "single") patch.endDate = value;
+    update(patch);
+  };
+
+  const datesValid =
+    form.date && form.date >= todayISO() && (form.mode === "single" || (form.endDate && form.endDate >= form.date));
+  const detailsValid = datesValid && form.name.trim() && /\S+@\S+\.\S+/.test(form.email) && hoursPerDay >= 1 && Number(form.crew) >= 1;
 
   const cardDigits = form.cardNumber.replace(/\D/g, "");
   const paymentValid = form.cardName.trim() && cardDigits.length >= 15 && /^\d{2}\s*\/\s*\d{2}$/.test(form.expiry) && /^\d{3,4}$/.test(form.cvc);
 
   const goToPayment = () => {
+    if (!datesValid) {
+      setError("Pick valid dates — for a multi-day booking the end date must be on or after the start date.");
+      return;
+    }
     if (!detailsValid) {
       setError("Please complete the dates, crew size, and your contact details.");
       return;
@@ -109,6 +146,7 @@ export function BookingUIProvider({ children }) {
     await new Promise((r) => setTimeout(r, 1100)); // simulate the payment authorize/capture
     const summary = createBooking(listing, {
       ...form,
+      endDate: form.mode === "range" ? form.endDate : form.date,
       cardBrand: detectBrand(form.cardNumber),
       last4: cardDigits.slice(-4),
     });
@@ -145,8 +183,14 @@ export function BookingUIProvider({ children }) {
                 <p className="muted small">Hosted by {listing.host || "Phrazs host"}</p>
                 {pricing && (
                   <div className="price-breakdown">
+                    {days > 1 && (
+                      <div>
+                        <span>{days} days × {hoursPerDay} hrs/day</span>
+                        <span>{totalHours} hrs</span>
+                      </div>
+                    )}
                     <div>
-                      <span>{money(listing.price)} × {Math.max(1, Number(form.hours) || 1)} hrs</span>
+                      <span>{money(listing.price)} × {totalHours} hrs</span>
                       <span>{money(pricing.subtotal)}</span>
                     </div>
                     <div>
@@ -173,24 +217,66 @@ export function BookingUIProvider({ children }) {
               {step === "details" && (
                 <div className="booking-fields fade-in">
                   <h2>Book this space</h2>
-                  <div className="grid-2">
-                    <label>
-                      Date
-                      <input type="date" min={todayISO()} value={form.date} onChange={(e) => update({ date: e.target.value })} />
-                    </label>
-                    <label>
-                      Start time
-                      <input type="time" value={form.startTime} step="1800" onChange={(e) => update({ startTime: e.target.value })} />
-                    </label>
-                    <label>
-                      Hours
-                      <input type="number" min="1" max="24" value={form.hours} onChange={(e) => update({ hours: e.target.value })} />
-                    </label>
-                    <label>
-                      Crew / guests
-                      <input type="number" min="1" max={listing.crew || 200} value={form.crew} onChange={(e) => update({ crew: e.target.value })} />
-                    </label>
+
+                  <div className="booking-mode" role="tablist" aria-label="Booking length">
+                    <button type="button" role="tab" aria-selected={form.mode === "single"} className={form.mode === "single" ? "on" : ""} onClick={() => setMode("single")}>
+                      Single day
+                    </button>
+                    <button type="button" role="tab" aria-selected={form.mode === "range"} className={form.mode === "range" ? "on" : ""} onClick={() => setMode("range")}>
+                      Multiple days
+                    </button>
                   </div>
+
+                  {form.mode === "single" ? (
+                    <div className="grid-2">
+                      <label>
+                        Date
+                        <input type="date" min={todayISO()} value={form.date} onChange={(e) => changeStartDate(e.target.value)} />
+                      </label>
+                      <label>
+                        Start time
+                        <input type="time" value={form.startTime} step="1800" onChange={(e) => update({ startTime: e.target.value })} />
+                      </label>
+                      <label>
+                        Hours
+                        <input type="number" min="1" max="24" value={form.hours} onChange={(e) => update({ hours: e.target.value })} />
+                      </label>
+                      <label>
+                        Crew / guests
+                        <input type="number" min="1" max={listing.crew || 200} value={form.crew} onChange={(e) => update({ crew: e.target.value })} />
+                      </label>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid-2">
+                        <label>
+                          Start date
+                          <input type="date" min={todayISO()} value={form.date} onChange={(e) => changeStartDate(e.target.value)} />
+                        </label>
+                        <label>
+                          End date
+                          <input type="date" min={form.date} value={form.endDate} onChange={(e) => update({ endDate: e.target.value })} />
+                        </label>
+                      </div>
+                      <div className="grid-2">
+                        <label>
+                          Start time / day
+                          <input type="time" value={form.startTime} step="1800" onChange={(e) => update({ startTime: e.target.value })} />
+                        </label>
+                        <label>
+                          Hours per day
+                          <input type="number" min="1" max="24" value={form.hours} onChange={(e) => update({ hours: e.target.value })} />
+                        </label>
+                      </div>
+                      <label>
+                        Crew / guests
+                        <input type="number" min="1" max={listing.crew || 200} value={form.crew} onChange={(e) => update({ crew: e.target.value })} />
+                      </label>
+                      <p className="range-summary">
+                        <strong>{days} {days === 1 ? "day" : "days"}</strong> · {hoursPerDay} hrs each ({form.startTime}–{endTime}) · <strong>{totalHours} hrs total</strong>
+                      </p>
+                    </>
+                  )}
                   <label>
                     Your name
                     <input type="text" placeholder="Jordan Cole" value={form.name} onChange={(e) => update({ name: e.target.value })} />
@@ -266,16 +352,19 @@ export function BookingUIProvider({ children }) {
                   <div className="success-check">✓</div>
                   <h2>You're booked!</h2>
                   <p className="muted">
-                    {listing.title} · {prettyDate(result.date)} · {result.startTime}–{result.endTime}
+                    {listing.title} ·{" "}
+                    {result.days > 1
+                      ? `${prettyDate(result.date)} → ${prettyDate(result.endDate)}`
+                      : `${prettyDate(result.date)} · ${result.startTime}–${result.endTime}`}
                   </p>
                   <div className="success-summary">
                     <div>
-                      <span>Crew</span>
-                      <strong>{result.crew}</strong>
+                      <span>{result.days > 1 ? "Days" : "Crew"}</span>
+                      <strong>{result.days > 1 ? result.days : result.crew}</strong>
                     </div>
                     <div>
-                      <span>Hours</span>
-                      <strong>{result.hours}</strong>
+                      <span>{result.days > 1 ? "Hrs / day" : "Hours"}</span>
+                      <strong>{result.days > 1 ? result.hoursPerDay : result.hours}</strong>
                     </div>
                     <div>
                       <span>Total paid</span>
