@@ -162,26 +162,30 @@ async function getStripeSession(sessionId) {
 }
 
 async function createCheckoutSession(req, res) {
-  const { listing, booking, pricing } = await readJson(req);
+  const { listing, booking, pricing, returnBase } = await readJson(req);
   if (!listing?.id || !listing?.title || !booking?.guestEmail || !pricing?.total) {
     json(res, 400, { error: "Missing listing, booking, or pricing details." });
     return;
   }
+
+  // The frontend sends its own base URL so redirects land on the exact page the
+  // user is on (e.g. a GitHub Pages project path like /Phrazs/), not just SITE_URL.
+  const base = String(returnBase || SITE_URL).replace(/\/$/, "");
 
   // Demo mode: no Stripe key configured yet. Simulate a successful Stripe Checkout
   // session so the booking + payment flow works end to end. Replace by setting
   // STRIPE_SECRET_KEY to switch to real Stripe charges.
   if (!STRIPE_SECRET_KEY) {
     const id = `cs_demo_${randomBytes(12).toString("hex")}`;
-    json(res, 200, { id, url: `${SITE_URL}/#/checkout-success?session_id=${id}` });
+    json(res, 200, { id, url: `${base}/#/checkout-success?session_id=${id}` });
     return;
   }
 
   const params = new URLSearchParams();
   params.set("mode", "payment");
   params.set("customer_email", booking.guestEmail);
-  params.set("success_url", `${SITE_URL}/#/checkout-success?session_id={CHECKOUT_SESSION_ID}`);
-  params.set("cancel_url", `${SITE_URL}/#/listing/${encodeURIComponent(listing.id)}`);
+  params.set("success_url", `${base}/#/checkout-success?session_id={CHECKOUT_SESSION_ID}`);
+  params.set("cancel_url", `${base}/#/listing/${encodeURIComponent(listing.id)}`);
   params.set("line_items[0][quantity]", "1");
   params.set("line_items[0][price_data][currency]", "usd");
   params.set("line_items[0][price_data][unit_amount]", String(cents(pricing.total)));

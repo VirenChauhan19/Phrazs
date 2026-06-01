@@ -48,10 +48,13 @@ export function markCheckoutCompleted(sessionId) {
 }
 
 export async function createCheckoutSession(payload) {
+  // Tell the backend where to send the user back to — the exact origin + path
+  // they're on (handles GitHub Pages project paths like /Phrazs/).
+  const returnBase = `${window.location.origin}${window.location.pathname}`;
   const response = await fetch(apiUrl("/api/create-checkout-session"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, returnBase }),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || "Unable to start Stripe Checkout.");
