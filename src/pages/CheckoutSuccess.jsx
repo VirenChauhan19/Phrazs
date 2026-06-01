@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useBookingUI } from "../booking-ui.jsx";
 import { useStore } from "../store.jsx";
+import { useUserAuth } from "../user-auth.jsx";
 import {
   clearPendingCheckout,
   getCheckoutSession,
@@ -15,6 +16,7 @@ export default function CheckoutSuccess() {
   const location = useLocation();
   const { listings, createBooking } = useStore();
   const { showToast } = useBookingUI();
+  const { saveBooking } = useUserAuth();
   const started = useRef(false);
   const [state, setState] = useState({ status: "loading", message: "Verifying your Stripe payment..." });
 
@@ -66,6 +68,24 @@ export default function CheckoutSuccess() {
           cardBrand: "Stripe",
           last4: String(session.payment_intent || session.id).slice(-4),
         });
+        // If the guest is signed in, save this booking to their account (no-op otherwise).
+        await saveBooking({
+          propertyId: listing.id,
+          property: listing.title,
+          host: listing.host || "Phrazs host",
+          start: `${summary.date} ${summary.startTime}`,
+          end: `${summary.endDate} ${summary.endTime}`,
+          date: summary.date,
+          endDate: summary.endDate,
+          days: summary.days,
+          hours: summary.hours,
+          crew: summary.crew,
+          total: summary.total,
+          status: "Confirmed",
+          paymentStatus: "Paid",
+          schedule: summary.schedule,
+          notes: pending.form.notes || "",
+        });
         markCheckoutCompleted(session.id);
         clearPendingCheckout();
         showToast(`Booking confirmed for ${listing.title} - it's now live in the Admin dashboard.`);
@@ -76,7 +96,7 @@ export default function CheckoutSuccess() {
     }
 
     finishCheckout();
-  }, [createBooking, listings, location.search, showToast]);
+  }, [createBooking, listings, location.search, showToast, saveBooking]);
 
   return (
     <section className="section checkout-result">
