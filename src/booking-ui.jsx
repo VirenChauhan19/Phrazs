@@ -21,7 +21,8 @@ function defaultForm(listing) {
     endDate: start,
     startTime: "09:00",
     hours: Math.min(Math.max(listing?.hours || 2, 1), 4) || 2, // default hours applied to each day
-    hoursByDate: {}, // per-day overrides for multi-day bookings, keyed by YYYY-MM-DD
+    hoursByDate: {}, // per-day hours overrides for multi-day bookings, keyed by YYYY-MM-DD
+    startByDate: {}, // per-day start-time overrides for multi-day bookings, keyed by YYYY-MM-DD
     crew: 1,
     name: "",
     email: "",
@@ -77,13 +78,15 @@ export function BookingUIProvider({ children }) {
 
   const hoursPerDay = Math.max(1, Number(form.hours) || 1);
 
-  // Build a per-day schedule. Each day can carry its own hours (a `hoursByDate`
-  // override); days with no override fall back to the default `form.hours`.
+  // Build a per-day schedule. Each day can carry its own hours and start time
+  // (overrides keyed by date); days with no override fall back to the form
+  // defaults. End time is derived from that day's start + hours.
   const scheduleDates = form.mode === "range" ? dateRange(form.date, form.endDate) : [form.date];
-  const schedule = scheduleDates.map((date) => ({
-    date,
-    hours: Math.max(1, Number(form.hoursByDate?.[date] ?? form.hours) || 1),
-  }));
+  const schedule = scheduleDates.map((date) => {
+    const hours = Math.max(1, Number(form.hoursByDate?.[date] ?? form.hours) || 1);
+    const start = form.startByDate?.[date] || form.startTime;
+    return { date, hours, start, end: addHoursToTime(start, hours) };
+  });
   const days = schedule.length;
   const totalHours = schedule.reduce((sum, d) => sum + d.hours, 0);
 
@@ -101,6 +104,7 @@ export function BookingUIProvider({ children }) {
 
   const update = (patch) => setForm((f) => ({ ...f, ...patch }));
   const setDayHours = (date, value) => update({ hoursByDate: { ...form.hoursByDate, [date]: value } });
+  const setDayStart = (date, value) => update({ startByDate: { ...form.startByDate, [date]: value } });
 
   // Switching modes keeps a sensible date range (at least 2 days when going multi-day).
   const setMode = (mode) => {
@@ -309,21 +313,37 @@ export function BookingUIProvider({ children }) {
                         </label>
                       </div>
                       <label>
-                        Start time (each day)
+                        Default start time
                         <input type="time" value={form.startTime} step="1800" onChange={(e) => update({ startTime: e.target.value })} />
+                        <small className="field-hint">Sets every day — adjust any day individually below.</small>
                       </label>
 
                       <div className="day-schedule">
                         <div className="day-schedule__head">
-                          <span>Hours per day</span>
+                          <span>Schedule per day</span>
                           {hoursCap > 0 && <small className={`field-hint ${hoursOverCap ? "over" : ""}`}>Up to {hoursCap} hrs / day</small>}
                         </div>
-                        {schedule.map(({ date, hours }) => {
+                        <div className="day-row day-row--head" aria-hidden="true">
+                          <span>Day</span>
+                          <span>Start</span>
+                          <span>End</span>
+                          <span>Hrs</span>
+                        </div>
+                        {schedule.map(({ date, hours, start, end }) => {
                           const over = hoursCap > 0 && hours > hoursCap;
+                          const overridden = form.startByDate?.[date] && form.startByDate[date] !== form.startTime;
                           return (
                             <div className={`day-row ${over ? "over" : ""}`} key={date}>
                               <span className="day-row__date">{shortDate(date)}</span>
-                              <span className="day-row__time">{form.startTime}-{addHoursToTime(form.startTime, hours)}</span>
+                              <input
+                                type="time"
+                                step="1800"
+                                className={`day-row__start ${overridden ? "is-custom" : ""}`}
+                                value={start}
+                                onChange={(e) => setDayStart(date, e.target.value)}
+                                aria-label={`Start time on ${shortDate(date)}`}
+                              />
+                              <span className="day-row__end">{end}</span>
                               <input
                                 type="number"
                                 min="1"

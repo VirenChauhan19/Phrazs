@@ -80,7 +80,11 @@ export function StoreProvider({ children }) {
     const schedule = (Array.isArray(form.schedule) && form.schedule.length
       ? form.schedule
       : [{ date: form.date, hours: Math.max(1, Number(form.hours) || 1) }]
-    ).map((d) => ({ date: d.date, hours: Math.max(1, Number(d.hours) || 1) }));
+    ).map((d) => {
+      const hours = Math.max(1, Number(d.hours) || 1);
+      const start = d.start || startTime;
+      return { date: d.date, hours, start, end: d.end || addHoursToTime(start, hours) };
+    });
 
     const date = schedule[0].date;
     const endDate = schedule[schedule.length - 1].date;
@@ -88,7 +92,8 @@ export function StoreProvider({ children }) {
     const hours = schedule.reduce((sum, d) => sum + d.hours, 0); // total billable hours across the stay
     const uniform = schedule.every((d) => d.hours === schedule[0].hours);
     const hoursPerDay = uniform ? schedule[0].hours : null; // null when days differ
-    const endTime = addHoursToTime(startTime, schedule[schedule.length - 1].hours);
+    const firstStart = schedule[0].start; // first day's start (may differ per day)
+    const endTime = schedule[schedule.length - 1].end; // last day's end
     const { subtotal, platformFee, hostPayout, total } = priceBooking(listing.price, hours);
 
     setRecords((prev) => {
@@ -107,7 +112,7 @@ export function StoreProvider({ children }) {
         guest: form.name,
         guestEmail: form.email,
         host: listing.host || "Phrazs host",
-        start: `${date} ${startTime}`,
+        start: `${date} ${firstStart}`,
         end: `${endDate} ${endTime}`,
         date,
         endDate,
@@ -161,7 +166,7 @@ export function StoreProvider({ children }) {
         property: listing.title,
         status: "Booked",
         bookingId,
-        time: `${startTime}-${addHoursToTime(startTime, d.hours)}`,
+        time: `${d.start}-${d.end}`,
       }));
 
       // Add a guest user record only if this email is brand new.

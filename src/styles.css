@@ -658,18 +658,33 @@ blockquote span { color: #b8f2df; font-family: var(--mono); font-size: 0.72rem; 
 .day-schedule__head span { color: var(--ink); font-weight: 800; font-size: 0.86rem; }
 .day-row {
   display: grid;
-  grid-template-columns: 1fr auto 88px;
+  grid-template-columns: minmax(48px, 0.9fr) auto auto 64px;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 8px 10px;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 10px;
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
+.day-row--head {
+  background: transparent;
+  border: none;
+  padding: 0 10px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.day-row--head span:nth-child(2),
+.day-row--head span:nth-child(3) { text-align: center; }
+.day-row--head span:last-child { text-align: center; }
 .day-row__date { font-weight: 800; font-size: 0.9rem; }
 .day-row__time { color: var(--muted); font-size: 0.82rem; font-weight: 700; }
+.day-row__end { color: var(--muted); font-size: 0.84rem; font-weight: 800; text-align: center; }
 .day-row input { min-height: 38px; text-align: center; }
+.day-row__start.is-custom { border-color: var(--accent); color: var(--accent-dark); font-weight: 700; }
 .day-row.over { border-color: #b3261e; box-shadow: 0 0 0 2px rgba(179, 38, 30, 0.12); }
 .day-row.over input { border-color: #b3261e; color: #b3261e; }
 
