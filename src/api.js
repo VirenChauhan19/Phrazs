@@ -4,6 +4,17 @@ export function apiUrl(path) {
   return `${API_BASE}${path}`;
 }
 
+// Render's free tier sleeps when idle and takes ~30-50s to wake. Fire a cheap
+// request early (e.g. when the booking modal opens) so the API is warm by the
+// time the user actually checks out. Fire-and-forget; failures are ignored.
+export function warmApi() {
+  try {
+    fetch(apiUrl("/api/admin/session"), { credentials: "include" }).catch(() => {});
+  } catch {
+    /* ignore */
+  }
+}
+
 export async function apiRequest(path, options = {}) {
   let response;
   try {

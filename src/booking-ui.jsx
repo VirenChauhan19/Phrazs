@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { priceBooking } from "./store.jsx";
+import { warmApi } from "./api.js";
 import { createCheckoutSession, savePendingCheckout } from "./stripe.js";
 import { money, todayISO, prettyDate, shortDate, dateRange, addDays } from "./utils.js";
 
@@ -50,6 +51,8 @@ export function BookingUIProvider({ children }) {
     setResult(null);
     setError("");
     setProcessing(false);
+    // Wake the (possibly sleeping) API now so checkout is fast later.
+    warmApi();
   }, []);
 
   const closeBooking = useCallback(() => {
@@ -425,6 +428,7 @@ export function BookingUIProvider({ children }) {
                     {processing ? <span className="spinner" /> : null}
                     {processing ? "Opening Stripe..." : `Pay ${money(pricing.total)} with Stripe`}
                   </button>
+                  {processing && <p className="muted small center">Connecting to the payment server… the first booking after a while can take up to a minute.</p>}
                   <p className="muted small center">Use Stripe test card 4242 4242 4242 4242 while your account is in test mode.</p>
                 </div>
               )}
