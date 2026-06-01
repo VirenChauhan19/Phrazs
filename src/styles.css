@@ -1141,7 +1141,8 @@ table.clickable tbody tr:focus-visible { outline: 2px solid #2271b1; outline-off
   font-weight: 540;
   text-wrap: balance;
 }
-.hero-title span { display: inline-block; will-change: transform; }
+.hero-title span { display: inline-block; margin-right: 0.26em; will-change: transform; }
+.hero-title__tail { margin-right: 0; }
 .hero-title .accent-word em,
 .hero-content h1 em { font-style: italic; font-weight: 460; color: var(--sun); }
 .hero-title__tail { color: rgba(255, 255, 255, 0.92); }
