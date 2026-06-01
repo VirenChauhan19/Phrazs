@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useStore } from "../store.jsx";
 import { useAuth } from "../auth.jsx";
-import { ADMIN_EMAIL, ADMIN_PASSCODE } from "../data.js";
 import { money } from "../utils.js";
 
 const TABS = [
@@ -53,6 +52,19 @@ function Table({ columns, rows, onRowClick }) {
 }
 
 const Status = ({ children }) => <span className="status">{children}</span>;
+
+const EMPTY_ADMIN = {
+  data: { brand: {}, legal: {}, source: {}, bookingStructure: { statuses: [], paymentFields: [], calendarRules: [] } },
+  media: [],
+  listings: [],
+  hosts: [],
+  bookings: [],
+  payments: [],
+  payouts: [],
+  calendar: [],
+  users: [],
+  inquiries: [],
+};
 
 function Field({ label, children }) {
   if (children === null || children === undefined || children === "") return null;
@@ -193,14 +205,40 @@ function BookingDetail({ booking, listing, payment, payout, calendar, onClose })
 
 export default function Admin() {
   const store = useStore();
-  const { data, media, listings, hosts, bookings, payments, payouts, calendar, users, inquiries, userBookingCount, exportData, resetUserData } = store;
-  const { isAdmin, signIn, signOut } = useAuth();
+  const { userBookingCount, resetUserData } = store;
+  const { isAdmin, checkingAdmin, signIn, signOut } = useAuth();
 
   const [tab, setTab] = useState("overview");
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
   const [detailId, setDetailId] = useState(null);
+  const [adminPayload, setAdminPayload] = useState(EMPTY_ADMIN);
+  const [loadingAdmin, setLoadingAdmin] = useState(false);
+  const [adminError, setAdminError] = useState("");
+
+  useEffect(() => {
+    if (!isAdmin) {
+      setAdminPayload(EMPTY_ADMIN);
+      return;
+    }
+    let alive = true;
+    setLoadingAdmin(true);
+    setAdminError("");
+    fetch("/api/admin/data", { credentials: "include" })
+      .then(async (response) => {
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || "Unable to load admin data.");
+        if (alive) setAdminPayload({ ...EMPTY_ADMIN, ...payload });
+      })
+      .catch((err) => alive && setAdminError(err.message || "Unable to load admin data."))
+      .finally(() => alive && setLoadingAdmin(false));
+    return () => {
+      alive = false;
+    };
+  }, [isAdmin]);
+
+  const { data, media, listings, hosts, bookings, payments, payouts, calendar, users, inquiries } = adminPayload;
 
   useEffect(() => {
     if (!detailId) return;
@@ -217,7 +255,7 @@ export default function Admin() {
     const paidGross = payments.reduce((s, p) => s + (p.gross || 0), 0);
     const active = bookings.filter((b) => ["Active", "Confirmed", "Pending Payment"].includes(b.status)).length;
     const completed = bookings.filter((b) => b.status === "Completed").length;
-    const avg = Math.round(listings.reduce((s, l) => s + (l.price || 0), 0) / listings.length);
+    const avg = listings.length ? Math.round(listings.reduce((s, l) => s + (l.price || 0), 0) / listings.length) : 0;
     return [
       ["Listings", listings.length],
       ["Hosts", hosts.length],
@@ -230,22 +268,23 @@ export default function Admin() {
     ];
   }, [payments, bookings, listings, hosts, users]);
 
-  const login = (e) => {
+  const login = async (e) => {
     e.preventDefault();
-    if (signIn(email, pass)) {
+    try {
+      await signIn(email, pass);
       setError("");
-    } else {
-      setError("That email or passcode is not authorized for admin access.");
+    } catch (err) {
+      setError(err.message || "That email or passcode is not authorized for admin access.");
     }
   };
 
-  const logout = () => {
-    signOut();
+  const logout = async () => {
+    await signOut();
     setPass("");
   };
 
   const download = () => {
-    const blob = new Blob([JSON.stringify(exportData(), null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(adminPayload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -253,6 +292,17 @@ export default function Admin() {
     link.click();
     URL.revokeObjectURL(url);
   };
+
+  if (checkingAdmin) {
+    return (
+      <section className="section admin-section">
+        <div className="admin-lock">
+          <p className="eyebrow">Owner Only</p>
+          <h2>Checking admin session...</h2>
+        </div>
+      </section>
+    );
+  }
 
   if (!isAdmin) {
     return (
@@ -277,7 +327,7 @@ export default function Admin() {
               Unlock Admin
             </button>
             {error && <p className="form-note">{error}</p>}
-            <p className="form-note muted">Demo credentials: {ADMIN_EMAIL} / {ADMIN_PASSCODE}</p>
+            <p className="form-note muted">Admin credentials are verified on the backend.</p>
           </form>
         </div>
       </section>
@@ -295,6 +345,8 @@ export default function Admin() {
 
   return (
     <section className="section admin-section">
+      {adminError && <p className="booking-error">{adminError}</p>}
+      {loadingAdmin && <p className="empty-state">Loading secured admin data...</p>}
       <div className="admin-dashboard">
         <div className="wp-adminbar">
           <div className="wp-adminbar__start">
@@ -574,13 +626,13 @@ export default function Admin() {
                       className="ghost-button"
                       type="button"
                       onClick={() => {
-                        if (confirm("Clear all bookings, payments, payouts, and inquiries created in this browser? Seeded data stays.")) resetUserData();
+                        if (confirm("Clear local bookings, payments, payouts, and inquiries created in this browser? Backend admin data stays.")) resetUserData();
                       }}
                     >
                       Reset session data
                     </button>
                   </div>
-                  <pre className="raw-data">{JSON.stringify(exportData(), null, 2)}</pre>
+                  <pre className="raw-data">{JSON.stringify(adminPayload, null, 2)}</pre>
                 </div>
               )}
             </div>

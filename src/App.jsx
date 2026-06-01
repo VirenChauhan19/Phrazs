@@ -12,6 +12,7 @@ import About from "./pages/About.jsx";
 import Admin from "./pages/Admin.jsx";
 import MyBookings from "./pages/MyBookings.jsx";
 import Terms from "./pages/Terms.jsx";
+import CheckoutSuccess from "./pages/CheckoutSuccess.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -107,6 +108,7 @@ export default function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/about" element={<About />} />
             <Route path="/bookings" element={<MyBookings />} />
+            <Route path="/checkout-success" element={<CheckoutSuccess />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<Home />} />

@@ -64,17 +64,12 @@ export function StoreProvider({ children }) {
     }
   }, [records]);
 
-  // Combined views: seeded data first, then anything created in the app.
-  const bookings = useMemo(() => [...records.bookings, ...PHRAZS_DATA.bookings], [records.bookings]);
-  const payments = useMemo(() => [...records.payments, ...PHRAZS_DATA.payments], [records.payments]);
-  const payouts = useMemo(() => [...records.payouts, ...PHRAZS_DATA.payouts], [records.payouts]);
-  const calendar = useMemo(() => [...records.calendar, ...PHRAZS_DATA.calendar], [records.calendar]);
-  const inquiries = useMemo(() => [...records.inquiries, ...PHRAZS_DATA.inquiries], [records.inquiries]);
-  const users = useMemo(() => {
-    const seen = new Set(PHRAZS_DATA.users.map((u) => u.email.toLowerCase()));
-    const extra = records.users.filter((u) => !seen.has(u.email.toLowerCase()));
-    return [...extra, ...PHRAZS_DATA.users];
-  }, [records.users]);
+  const bookings = records.bookings;
+  const payments = records.payments;
+  const payouts = records.payouts;
+  const calendar = records.calendar;
+  const inquiries = records.inquiries;
+  const users = records.users;
 
   const createBooking = useCallback((listing, form) => {
     const crew = Math.max(1, Number(form.crew) || 1);
@@ -97,9 +92,9 @@ export function StoreProvider({ children }) {
     const { subtotal, platformFee, hostPayout, total } = priceBooking(listing.price, hours);
 
     setRecords((prev) => {
-      const allBookings = [...prev.bookings, ...PHRAZS_DATA.bookings];
-      const allPayments = [...prev.payments, ...PHRAZS_DATA.payments];
-      const allPayouts = [...prev.payouts, ...PHRAZS_DATA.payouts];
+      const allBookings = prev.bookings;
+      const allPayments = prev.payments;
+      const allPayouts = prev.payouts;
 
       const bookingId = nextSequentialId("bk", allBookings, 1100);
       const paymentId = nextSequentialId("pay", allPayments, 9100);
@@ -136,15 +131,17 @@ export function StoreProvider({ children }) {
         id: paymentId,
         bookingId,
         processor: "Stripe",
-        method: "Card",
-        cardBrand: form.cardBrand || CARD_BRANDS[allPayments.length % CARD_BRANDS.length],
-        last4: form.last4 || String(Math.floor(1000 + Math.random() * 9000)),
+        method: form.paymentMethod || "Stripe Checkout",
+        cardBrand: form.cardBrand || "Stripe",
+        last4: form.last4 || String(form.stripeSessionId || "").slice(-4) || String(Math.floor(1000 + Math.random() * 9000)),
         gross: total,
         fees: round2(total * 0.029 + 0.3),
         net: round2(total - (total * 0.029 + 0.3)),
         refunded: 0,
         status: "Captured",
         capturedAt: new Date().toISOString().slice(0, 16).replace("T", " "),
+        stripeSessionId: form.stripeSessionId || "",
+        stripePaymentIntent: form.stripePaymentIntent || "",
       };
 
       const payoutDate = new Date(`${endDate}T00:00:00`);
@@ -169,13 +166,12 @@ export function StoreProvider({ children }) {
 
       // Add a guest user record only if this email is brand new.
       const knownEmails = new Set([
-        ...PHRAZS_DATA.users.map((u) => u.email.toLowerCase()),
         ...prev.users.map((u) => u.email.toLowerCase()),
       ]);
       const newUsers = [...prev.users];
       if (!knownEmails.has(form.email.toLowerCase())) {
         newUsers.unshift({
-          id: nextSequentialId("usr", [...PHRAZS_DATA.users, ...prev.users], 100),
+          id: nextSequentialId("usr", prev.users, 100),
           name: form.name,
           email: form.email,
           role: "Guest",
@@ -201,7 +197,7 @@ export function StoreProvider({ children }) {
 
   const submitInquiry = useCallback((form) => {
     setRecords((prev) => {
-      const all = [...prev.inquiries, ...PHRAZS_DATA.inquiries];
+      const all = prev.inquiries;
       const id = nextSequentialId("lead", all, 100);
       const inquiry = {
         id,

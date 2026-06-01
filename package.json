@@ -6,6 +6,8 @@
   "description": "Phrazs marketplace - React rebuild with live map, booking flow, and admin dashboard.",
   "scripts": {
     "dev": "vite",
+    "api:dev": "node server/stripe-server.mjs",
+    "stripe:dev": "node server/stripe-server.mjs",
     "build": "vite build",
     "preview": "vite preview"
   },

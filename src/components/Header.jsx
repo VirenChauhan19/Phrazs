@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useStore } from "../store.jsx";
 import { useAuth } from "../auth.jsx";
@@ -35,26 +36,26 @@ export default function Header() {
     setBusy(false);
   };
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
     setBusy(true);
     setError("");
-    // tiny delay so the button's loading state is perceptible
-    setTimeout(() => {
-      const ok = signIn(email, pass);
+    try {
+      const ok = await signIn(email, pass);
       if (ok) {
         setPass("");
         closeAuth();
         navigate("/admin");
-      } else {
-        setError("Those credentials are not authorized. Use your owner email and admin passcode.");
-        setBusy(false);
       }
-    }, 320);
+    } catch (err) {
+      setError(err.message || "Those credentials are not authorized.");
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const handleSignOut = () => {
-    signOut();
+  const handleSignOut = async () => {
+    await signOut();
     setMenuOpen(false);
     navigate("/");
   };
@@ -104,7 +105,7 @@ export default function Header() {
         </Link>
       </div>
 
-      {authOpen && (
+      {authOpen && createPortal(
         <div className="modal" onMouseDown={(e) => e.target === e.currentTarget && closeAuth()}>
           <div className="modal-panel modal-pop">
             <button className="modal-close" type="button" onClick={closeAuth} aria-label="Close">
@@ -142,9 +143,11 @@ export default function Header() {
               </button>
               {error && <p className="form-note shake">{error}</p>}
             </form>
-            <p className="form-note muted">Demo credentials live on the Admin lock screen.</p>
+            <p className="form-note muted">Admin credentials are verified by the backend.</p>
           </div>
         </div>
+        ,
+        document.body
       )}
     </header>
   );

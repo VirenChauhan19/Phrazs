@@ -570,8 +570,8 @@ blockquote span { color: #b8f2df; font-family: var(--mono); font-size: 0.72rem; 
 .site-footer a:hover { color: #fff; }
 
 /* ---------- Modal (auth) ---------- */
-.modal { position: fixed; inset: 0; z-index: 1100; display: grid; place-items: center; padding: 20px; background: rgba(10, 20, 18, 0.58); }
-.modal-panel { position: relative; display: grid; gap: 16px; width: min(440px, 100%); }
+.modal { position: fixed; inset: 0; z-index: 1100; display: flex; align-items: center; justify-content: center; min-height: 100dvh; padding: 20px; overflow-y: auto; background: rgba(10, 20, 18, 0.58); }
+.modal-panel { position: relative; display: grid; gap: 16px; width: min(440px, 100%); max-height: calc(100dvh - 40px); overflow-y: auto; }
 .modal-close, .booking-close { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 999px; background: #fff; cursor: pointer; font-size: 1rem; }
 .form-note { grid-column: 1 / -1; margin: 0; color: var(--clay); font-size: 0.9rem; font-weight: 800; }
 .empty-state { padding: 26px; background: #fff; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); }
@@ -584,7 +584,8 @@ blockquote span { color: #b8f2df; font-family: var(--mono); font-size: 0.72rem; 
   display: grid;
   grid-template-columns: 320px 1fr;
   width: min(900px, 100%);
-  max-height: 92vh;
+  height: min(760px, calc(100dvh - 36px));
+  max-height: calc(100dvh - 36px);
   overflow: hidden;
   background: #fff;
   border-radius: 16px;
@@ -592,14 +593,14 @@ blockquote span { color: #b8f2df; font-family: var(--mono); font-size: 0.72rem; 
   animation: modal-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 @keyframes modal-in { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
-.booking-aside { background: var(--soft); display: flex; flex-direction: column; }
+.booking-aside { min-height: 0; background: var(--soft); display: flex; flex-direction: column; }
 .booking-aside > img { width: 100%; height: 180px; object-fit: cover; }
-.booking-aside-body { padding: 20px; display: grid; gap: 6px; align-content: start; }
+.booking-aside-body { min-height: 0; padding: 20px; display: grid; gap: 6px; align-content: start; overflow-y: auto; }
 .chip { display: inline-flex; width: fit-content; padding: 5px 11px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; font-family: var(--mono); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-dark); }
 .price-breakdown { margin-top: 14px; display: grid; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line); }
 .price-breakdown div { display: flex; justify-content: space-between; font-size: 0.92rem; }
 .price-total { font-weight: 900; font-size: 1.05rem !important; padding-top: 8px; border-top: 1px dashed var(--line); }
-.booking-main { padding: 26px; overflow-y: auto; }
+.booking-main { min-height: 0; padding: 26px; overflow-y: auto; overscroll-behavior: contain; }
 .booking-steps { display: flex; gap: 8px; margin-bottom: 18px; font-size: 0.78rem; font-weight: 800; color: var(--muted); flex-wrap: wrap; }
 .booking-steps span { padding: 6px 12px; border-radius: 999px; background: var(--soft); }
 .booking-steps span.on { background: var(--accent); color: #fff; }
@@ -707,6 +708,11 @@ blockquote span { color: #b8f2df; font-family: var(--mono); font-size: 0.72rem; 
 .booking-receipt__notes { margin: 0; font-style: italic; }
 .booking-receipt__actions { display: flex; align-items: center; gap: 18px; }
 .booking-error { margin: 0; color: #b3261e; font-weight: 700; font-size: 0.9rem; }
+.checkout-summary { display: grid; gap: 10px; padding: 14px; background: var(--soft); border: 1px solid var(--line); border-radius: 12px; }
+.checkout-summary div { display: flex; justify-content: space-between; gap: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.checkout-summary div:last-child { padding-bottom: 0; border-bottom: 0; }
+.checkout-summary span { color: var(--muted); font-size: 0.78rem; font-weight: 800; }
+.checkout-summary strong { color: var(--ink); text-align: right; }
 .terms-check { display: flex; align-items: flex-start; gap: 10px; color: var(--ink); font-family: var(--body); font-size: 0.9rem; font-weight: 600; letter-spacing: 0; text-transform: none; cursor: pointer; }
 .terms-check input { width: 18px; height: 18px; min-height: 0; margin-top: 1px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
 .terms-check span { line-height: 1.4; }
@@ -723,6 +729,9 @@ blockquote span { color: #b8f2df; font-family: var(--mono); font-size: 0.72rem; 
 .success-summary span { display: block; color: var(--muted); font-size: 0.78rem; font-weight: 800; }
 .success-summary strong { font-size: 1.1rem; }
 .success-actions { display: flex; gap: 12px; margin-top: 6px; }
+.checkout-result { min-height: 62vh; display: grid; place-items: center; text-align: center; }
+.checkout-result > div { width: min(620px, 100%); display: grid; gap: 18px; justify-items: center; }
+.checkout-result .checkout-summary { width: min(460px, 100%); text-align: left; }
 
 /* ---------- Toast ---------- */
 .toast {
@@ -1036,8 +1045,17 @@ table.clickable tbody tr:focus-visible { outline: 2px solid #2271b1; outline-off
   .section-heading { flex-direction: column; align-items: start; }
   .hero { min-height: auto; padding: 80px 18px; }
   .category-grid, .property-grid, .property-grid.two, .host-grid, .blog-grid, .testimonial-grid, .media-grid, .step-list, .metric-grid, .content-columns, .admin-overview, .calendar-grid, .detail-stats { grid-template-columns: 1fr; }
-  .booking-modal { grid-template-columns: 1fr; max-height: 94vh; }
-  .booking-aside > img { height: 130px; }
+  .booking-overlay { align-items: stretch; padding: 10px; }
+  .booking-modal {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: calc(100dvh - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+  .booking-aside { max-height: 236px; }
+  .booking-aside > img { height: 110px; }
+  .booking-aside-body { padding: 14px 16px; }
+  .booking-main { padding: 18px; }
   .gallery-main img { height: 280px; }
   .gallery-thumbs { grid-template-columns: repeat(4, 1fr); }
   .host-card { grid-template-columns: 1fr; }

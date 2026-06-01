@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { useStore, priceBooking } from "./store.jsx";
+import { priceBooking } from "./store.jsx";
+import { createCheckoutSession, savePendingCheckout } from "./stripe.js";
 import { money, todayISO, prettyDate, shortDate, dateRange, addDays } from "./utils.js";
 
 function addHoursToTime(time, hours) {
@@ -9,15 +10,6 @@ function addHoursToTime(time, hours) {
 }
 
 const BookingUIContext = createContext(null);
-
-function detectBrand(number) {
-  const n = number.replace(/\D/g, "");
-  if (n.startsWith("4")) return "Visa";
-  if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return "Mastercard";
-  if (/^3[47]/.test(n)) return "American Express";
-  if (/^6/.test(n)) return "Discover";
-  return "Card";
-}
 
 function defaultForm(listing) {
   const t = new Date();
@@ -34,16 +26,11 @@ function defaultForm(listing) {
     name: "",
     email: "",
     notes: "",
-    cardName: "",
-    cardNumber: "",
-    expiry: "",
-    cvc: "",
     acceptedTerms: false,
   };
 }
 
 export function BookingUIProvider({ children }) {
-  const { createBooking } = useStore();
   const [listing, setListing] = useState(null);
   const [step, setStep] = useState("details");
   const [form, setForm] = useState(defaultForm(null));
@@ -144,9 +131,6 @@ export function BookingUIProvider({ children }) {
     !hoursOverCap &&
     !crewOverCap;
 
-  const cardDigits = form.cardNumber.replace(/\D/g, "");
-  const paymentValid = form.cardName.trim() && cardDigits.length >= 15 && /^\d{2}\s*\/\s*\d{2}$/.test(form.expiry) && /^\d{3,4}$/.test(form.cvc);
-
   // Shown live (as the user types) when a cap is exceeded.
   const capError = hoursOverCap
     ? `This space allows up to ${hoursCap} hours per day. Please lower the hours to continue.`
@@ -172,28 +156,52 @@ export function BookingUIProvider({ children }) {
   };
 
   const confirmAndPay = async () => {
-    if (!paymentValid) {
-      setError("Enter valid card details to confirm. Try 4242 4242 4242 4242.");
-      return;
-    }
     if (!form.acceptedTerms) {
       setError("Please accept the Terms & Conditions to confirm your booking.");
       return;
     }
+    if (!pricing) {
+      setError("Unable to price this booking. Please close and try again.");
+      return;
+    }
     setError("");
     setProcessing(true);
-    await new Promise((r) => setTimeout(r, 1100)); // simulate the payment authorize/capture
-    const summary = createBooking(listing, {
-      ...form,
-      endDate: form.mode === "range" ? form.endDate : form.date,
-      schedule,
-      cardBrand: detectBrand(form.cardNumber),
-      last4: cardDigits.slice(-4),
-    });
-    setResult(summary);
-    setProcessing(false);
-    setStep("success");
-    showToast(`Booking confirmed for ${listing.title} - it's now live in the Admin dashboard.`);
+    try {
+      const pendingForm = {
+        ...form,
+        endDate: form.mode === "range" ? form.endDate : form.date,
+        schedule,
+      };
+      const session = await createCheckoutSession({
+        listing: {
+          id: listing.id,
+          title: listing.title,
+          price: listing.price,
+          host: listing.host || "Phrazs host",
+        },
+        booking: {
+          guestName: form.name,
+          guestEmail: form.email,
+          startDate: form.date,
+          endDate: pendingForm.endDate,
+          startTime: form.startTime,
+          days,
+          totalHours,
+          crew: crewCount,
+        },
+        pricing,
+      });
+      savePendingCheckout({
+        sessionId: session.id,
+        listingId: listing.id,
+        form: pendingForm,
+        createdAt: new Date().toISOString(),
+      });
+      window.location.assign(session.url);
+    } catch (err) {
+      setError(err.message || "Stripe Checkout could not be started.");
+      setProcessing(false);
+    }
   };
 
   const value = useMemo(() => ({ openBooking, showToast }), [openBooking, showToast]);
@@ -364,42 +372,23 @@ export function BookingUIProvider({ children }) {
                   <button className="link-back" type="button" onClick={() => setStep("details")}>
                     ← Back to details
                   </button>
-                  <h2>Payment</h2>
-                  <p className="muted small">Test mode - use card 4242 4242 4242 4242, any future expiry, any CVC.</p>
-                  <label>
-                    Name on card
-                    <input type="text" placeholder="Jordan Cole" value={form.cardName} onChange={(e) => update({ cardName: e.target.value })} />
-                  </label>
-                  <label>
-                    Card number
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="4242 4242 4242 4242"
-                      value={form.cardNumber}
-                      onChange={(e) => {
-                        const digits = e.target.value.replace(/\D/g, "").slice(0, 16);
-                        update({ cardNumber: digits.replace(/(.{4})/g, "$1 ").trim() });
-                      }}
-                    />
-                  </label>
-                  <div className="grid-2">
-                    <label>
-                      Expiry
-                      <input
-                        type="text"
-                        placeholder="MM / YY"
-                        value={form.expiry}
-                        onChange={(e) => {
-                          const d = e.target.value.replace(/\D/g, "").slice(0, 4);
-                          update({ expiry: d.length > 2 ? `${d.slice(0, 2)} / ${d.slice(2)}` : d });
-                        }}
-                      />
-                    </label>
-                    <label>
-                      CVC
-                      <input type="text" inputMode="numeric" placeholder="123" value={form.cvc} onChange={(e) => update({ cvc: e.target.value.replace(/\D/g, "").slice(0, 4) })} />
-                    </label>
+                  <h2>Secure checkout</h2>
+                  <p className="muted small">You will finish payment on Stripe. Phrazs never sees or stores your card number.</p>
+                  <div className="checkout-summary">
+                    <div>
+                      <span>Space</span>
+                      <strong>{listing.title}</strong>
+                    </div>
+                    <div>
+                      <span>Schedule</span>
+                      <strong>
+                        {days} {days === 1 ? "day" : "days"} · {totalHours} hrs
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Total due</span>
+                      <strong>{money(pricing.total)}</strong>
+                    </div>
                   </div>
                   <label className="terms-check">
                     <input type="checkbox" checked={form.acceptedTerms} onChange={(e) => update({ acceptedTerms: e.target.checked })} />
@@ -414,9 +403,9 @@ export function BookingUIProvider({ children }) {
                   {error && <p className="booking-error">{error}</p>}
                   <button className="primary-button block" type="button" onClick={confirmAndPay} disabled={processing || !form.acceptedTerms}>
                     {processing ? <span className="spinner" /> : null}
-                    {processing ? "Processing…" : `Pay ${money(pricing.total)}`}
+                    {processing ? "Opening Stripe..." : `Pay ${money(pricing.total)} with Stripe`}
                   </button>
-                  <p className="muted small center">Secured by Stripe · You won't be charged in test mode.</p>
+                  <p className="muted small center">Use Stripe test card 4242 4242 4242 4242 while your account is in test mode.</p>
                 </div>
               )}
 

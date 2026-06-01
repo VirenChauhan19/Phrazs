@@ -1,41 +1,70 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { ADMIN_EMAIL, ADMIN_PASSCODE } from "./data.js";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 const AuthContext = createContext(null);
-const STORAGE_KEY = "phrazsAdminUnlocked";
+
+async function adminRequest(path, options = {}) {
+  const response = await fetch(path, {
+    ...options,
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "Admin request failed.");
+  return data;
+}
 
 export function AuthProvider({ children }) {
-  const [isAdmin, setIsAdmin] = useState(() => {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("");
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
+
+  const refreshAdmin = useCallback(async () => {
     try {
-      return sessionStorage.getItem(STORAGE_KEY) === "true";
+      const session = await adminRequest("/api/admin/session", { method: "GET" });
+      setIsAdmin(!!session.isAdmin);
+      setAdminEmail(session.email || "");
+      return !!session.isAdmin;
     } catch {
+      setIsAdmin(false);
+      setAdminEmail("");
       return false;
+    } finally {
+      setCheckingAdmin(false);
     }
-  });
-
-  const signIn = useCallback((email, password) => {
-    const ok = String(email).trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSCODE;
-    if (ok) {
-      try {
-        sessionStorage.setItem(STORAGE_KEY, "true");
-      } catch {
-        /* sessionStorage unavailable - keep in-memory */
-      }
-      setIsAdmin(true);
-    }
-    return ok;
   }, []);
 
-  const signOut = useCallback(() => {
+  useEffect(() => {
+    refreshAdmin();
+  }, [refreshAdmin]);
+
+  const signIn = useCallback(async (email, passcode) => {
+    const session = await adminRequest("/api/admin/login", {
+      method: "POST",
+      body: JSON.stringify({ email, passcode }),
+    });
+    setIsAdmin(!!session.isAdmin);
+    setAdminEmail(session.email || "");
+    return !!session.isAdmin;
+  }, []);
+
+  const signOut = useCallback(async () => {
     try {
-      sessionStorage.removeItem(STORAGE_KEY);
+      await adminRequest("/api/admin/logout", { method: "POST" });
     } catch {
-      /* ignore */
+      /* still clear local admin state if the network request fails */
+    } finally {
+      setIsAdmin(false);
+      setAdminEmail("");
     }
-    setIsAdmin(false);
   }, []);
 
-  const value = useMemo(() => ({ isAdmin, signIn, signOut }), [isAdmin, signIn, signOut]);
+  const value = useMemo(
+    () => ({ isAdmin, adminEmail, checkingAdmin, refreshAdmin, signIn, signOut }),
+    [isAdmin, adminEmail, checkingAdmin, refreshAdmin, signIn, signOut]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
