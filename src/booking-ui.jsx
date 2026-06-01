@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { priceBooking } from "./store.jsx";
 import { warmApi } from "./api.js";
 import { createCheckoutSession, savePendingCheckout } from "./stripe.js";
@@ -33,6 +34,7 @@ function defaultForm(listing) {
 }
 
 export function BookingUIProvider({ children }) {
+  const navigate = useNavigate();
   const [listing, setListing] = useState(null);
   const [step, setStep] = useState("details");
   const [form, setForm] = useState(defaultForm(null));
@@ -204,7 +206,20 @@ export function BookingUIProvider({ children }) {
         form: pendingForm,
         createdAt: new Date().toISOString(),
       });
-      window.location.assign(session.url);
+
+      // Demo sessions return an internal hash URL. Changing window.location to a
+      // same-page hash does NOT reload, so the modal would stay open over the
+      // success page. Route in-app instead. Real Stripe URLs are external, so we
+      // do a full redirect there (and it'll work unchanged once a key is added).
+      const isDemo = String(session.id).startsWith("cs_demo_");
+      if (isDemo) {
+        const hashIndex = session.url.indexOf("#");
+        const route = hashIndex >= 0 ? session.url.slice(hashIndex + 1) : `/checkout-success?session_id=${session.id}`;
+        closeBooking();
+        navigate(route);
+      } else {
+        window.location.assign(session.url);
+      }
     } catch (err) {
       setError(err.message || "Stripe Checkout could not be started.");
       setProcessing(false);
