@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useStore } from "../store.jsx";
 import { useBookingUI } from "../booking-ui.jsx";
+import { motion, Reveal, RevealGroup, fadeUp } from "../motion.jsx";
 
 export default function About() {
   const { data, media, submitInquiry } = useStore();
@@ -58,20 +59,29 @@ export default function About() {
       </section>
 
       <section className="section media-section">
-        <div className="section-heading">
+        <Reveal className="section-heading">
           <div>
-            <p className="eyebrow">Original Images</p>
-            <h2>Public Phrazs media from the live catalog.</h2>
+            <p className="eyebrow">Original images</p>
+            <h2>Straight from the live Phrazs catalog.</h2>
           </div>
-        </div>
-        <div className="media-grid">
+        </Reveal>
+        <RevealGroup className="media-grid" gap={0.05}>
           {featuredMedia.map((item) => (
-            <a className="media-card" href={item.url} target="_blank" rel="noreferrer" key={item.url}>
+            <motion.a
+              className="media-card"
+              href={item.url}
+              target="_blank"
+              rel="noreferrer"
+              key={item.url}
+              variants={fadeUp}
+              whileHover={{ y: -5 }}
+              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            >
               <img src={item.url} alt={item.page} loading="lazy" />
               <span>{item.page}</span>
-            </a>
+            </motion.a>
           ))}
-        </div>
+        </RevealGroup>
       </section>
     </>
   );

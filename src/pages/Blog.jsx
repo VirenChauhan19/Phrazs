@@ -1,18 +1,25 @@
 import { useStore } from "../store.jsx";
+import { motion, Reveal, RevealGroup, fadeUp } from "../motion.jsx";
 
 export default function Blog() {
   const { data } = useStore();
   return (
     <section className="section">
-      <div className="section-heading">
+      <Reveal className="section-heading">
         <div>
-          <p className="eyebrow">From the Blog</p>
-          <h2>Recent articles from the Phrazs blog.</h2>
+          <p className="eyebrow">From the blog</p>
+          <h2>Stories, tips, and behind the scenes.</h2>
         </div>
-      </div>
-      <div className="blog-grid">
+      </Reveal>
+      <RevealGroup className="blog-grid">
         {data.blog.map((post) => (
-          <article className="blog-card" key={post.title + post.date}>
+          <motion.article
+            className="blog-card"
+            key={post.title + post.date}
+            variants={fadeUp}
+            whileHover={{ y: -6 }}
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+          >
             <img src={post.image} alt={post.title} loading="lazy" />
             <div>
               <p className="card-meta">{post.categories.join(" · ")}</p>
@@ -22,9 +29,9 @@ export default function Blog() {
               </p>
               <p className="muted small">{post.comments}</p>
             </div>
-          </article>
+          </motion.article>
         ))}
-      </div>
+      </RevealGroup>
     </section>
   );
 }
