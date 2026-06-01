@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useStore } from "../store.jsx";
 import PropertyCard from "../components/PropertyCard.jsx";
+import { motion, Reveal, RevealGroup, fadeUp, fade, EASE } from "../motion.jsx";
 
 export default function Home() {
   const { data, listings } = useStore();
@@ -20,127 +21,200 @@ export default function Home() {
   };
 
   const steps = [
-    { n: "01", title: "Find a Property", text: "Browse and discover unique locations that bring your vision to life." },
-    { n: "02", title: "Check Reviews", text: "Read firsthand accounts from past visitors and creative teams." },
-    { n: "03", title: "Book a Space", text: "Book with ease and get your project rolling." },
+    { n: "01", title: "Find a space", text: "Browse curated locations that bring your shoot to life." },
+    { n: "02", title: "Check the vibe", text: "Real photos, honest reviews, and the details that matter." },
+    { n: "03", title: "Book by the hour", text: "Lock your dates, pay securely, and start creating." },
   ];
+
+  const stats = [
+    { value: `${listings.length}+`, label: "Curated spaces" },
+    { value: "4.9", label: "Avg. rating" },
+    { value: "1hr", label: "Min. booking" },
+    { value: "15%", label: "Flat service fee" },
+  ];
+
+  const headline = ["Find", "the", "perfect", "backdrop"];
 
   return (
     <>
       <section className="hero" style={{ "--hero": `url(${data.brand.heroImage})` }}>
-        <div className="hero-media" aria-hidden="true" />
+        <motion.div
+          className="hero-media"
+          aria-hidden="true"
+          initial={{ scale: 1.12, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.4, ease: EASE }}
+        />
         <div className="hero-content">
-          <p className="eyebrow">Phrazs marketplace</p>
-          <h1>
-            Find the perfect <em>backdrop</em> for your story
+          <motion.p className="eyebrow" variants={fade} initial="hidden" animate="show">
+            Phrazs · the marketplace for shoots
+          </motion.p>
+          <h1 className="hero-title" aria-label="Find the perfect backdrop for your story">
+            {headline.map((word, i) => (
+              <motion.span
+                key={word + i}
+                className={word === "backdrop" ? "accent-word" : ""}
+                initial={{ y: "110%", opacity: 0 }}
+                animate={{ y: "0%", opacity: 1 }}
+                transition={{ duration: 0.8, ease: EASE, delay: 0.15 + i * 0.08 }}
+              >
+                {word === "backdrop" ? <em>{word}</em> : word}{" "}
+              </motion.span>
+            ))}
+            <motion.span
+              className="hero-title__tail"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7, duration: 0.8, ease: EASE }}
+            >
+              for your story.
+            </motion.span>
           </h1>
-          <p>Explore unique, curated spaces available for short-term rent, ideal for shoots, special events, and creative projects.</p>
-          <form className="search-panel" onSubmit={runSearch}>
+          <motion.p
+            className="hero-sub"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55, duration: 0.7, ease: EASE }}
+          >
+            Unique, camera-ready locations for photo shoots, films, events, and creative projects — booked by the hour.
+          </motion.p>
+
+          <motion.form
+            className="search-panel"
+            onSubmit={runSearch}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.7, ease: EASE }}
+          >
             <label>
               <span>Keywords</span>
-              <input type="search" placeholder="Kitchen, studio, backyard" value={query} onChange={(e) => setQuery(e.target.value)} />
+              <input type="search" placeholder="Kitchen, studio, rooftop…" value={query} onChange={(e) => setQuery(e.target.value)} />
             </label>
             <label>
               <span>Category</span>
               <select value={category} onChange={(e) => setCategory(e.target.value)}>
                 {categories.map((c) => (
                   <option key={c} value={c}>
-                    {c === "All" ? "All Categories" : c}
+                    {c === "All" ? "All categories" : c}
                   </option>
                 ))}
               </select>
             </label>
             <button className="primary-button" type="submit">
-              Search
+              Search spaces
             </button>
-          </form>
-          <div className="quick-tags">
+          </motion.form>
+
+          <motion.div
+            className="quick-tags"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9, duration: 0.6 }}
+          >
+            <span className="quick-tags__label">Popular:</span>
             {data.tags.slice(0, 6).map((tag) => (
               <button key={tag} type="button" onClick={() => navigate(`/explore?q=${encodeURIComponent(tag)}`)}>
                 {tag}
               </button>
             ))}
-          </div>
+          </motion.div>
         </div>
+
+        <motion.div
+          className="hero-stats"
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 1 } } }}
+          initial="hidden"
+          animate="show"
+        >
+          {stats.map((s) => (
+            <motion.div key={s.label} className="hero-stat" variants={fadeUp}>
+              <strong>{s.value}</strong>
+              <span>{s.label}</span>
+            </motion.div>
+          ))}
+        </motion.div>
       </section>
 
       <section className="section">
-        <div className="section-heading">
+        <Reveal className="section-heading">
           <div>
-            <p className="eyebrow">Top Categories</p>
-            <h2>Explore the most popular categories.</h2>
+            <p className="eyebrow">Top categories</p>
+            <h2>Explore the most popular sets.</h2>
           </div>
           <Link className="text-link" to="/explore">
             View all spaces →
           </Link>
-        </div>
-        <div className="category-grid">
-          {data.categories.map((category) => (
-            <article
-              key={category.name}
+        </Reveal>
+        <RevealGroup className="category-grid">
+          {data.categories.map((cat) => (
+            <motion.article
+              key={cat.name}
               className="category-tile"
-              onClick={() => navigate(`/explore?category=${encodeURIComponent(category.name)}`)}
+              variants={fadeUp}
+              whileHover={{ y: -6 }}
+              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              onClick={() => navigate(`/explore?category=${encodeURIComponent(cat.name)}`)}
             >
-              <img src={category.image} alt={category.name} />
+              <img src={cat.image} alt={cat.name} />
               <div>
-                <span>{category.count} Listings</span>
-                <h3>{category.name}</h3>
-                <p>{category.description}</p>
+                <span>{cat.count} listings</span>
+                <h3>{cat.name}</h3>
+                <p>{cat.description}</p>
               </div>
-            </article>
+            </motion.article>
           ))}
-        </div>
+        </RevealGroup>
       </section>
 
       <section className="steps-band">
-        <div>
-          <p className="eyebrow">Get started</p>
-          <h2>Your perfect space is just a few steps away</h2>
-        </div>
-        <div className="step-list">
+        <Reveal>
+          <p className="eyebrow">How it works</p>
+          <h2>Your perfect space is three steps away.</h2>
+        </Reveal>
+        <RevealGroup className="step-list" gap={0.12}>
           {steps.map((s) => (
-            <article key={s.n}>
+            <motion.article key={s.n} variants={fadeUp}>
               <span>{s.n}</span>
               <h3>{s.title}</h3>
               <p>{s.text}</p>
-            </article>
+            </motion.article>
           ))}
-        </div>
+        </RevealGroup>
       </section>
 
       <section className="section">
-        <div className="section-heading">
+        <Reveal className="section-heading">
           <div>
-            <p className="eyebrow">Top Properties</p>
-            <h2>Check popular top-rated properties.</h2>
+            <p className="eyebrow">Top properties</p>
+            <h2>Popular, top-rated spaces.</h2>
           </div>
           <Link className="text-link" to="/explore">
             See the map →
           </Link>
-        </div>
-        <div className="property-grid">
+        </Reveal>
+        <RevealGroup className="property-grid">
           {featured.map((item) => (
             <PropertyCard key={item.id} item={item} />
           ))}
-        </div>
+        </RevealGroup>
       </section>
 
       <section className="testimonial-band">
-        <div>
-          <p className="eyebrow">What People Say</p>
-          <h2>Honest feedback from guests and hosts.</h2>
-        </div>
-        <div className="testimonial-grid">
+        <Reveal>
+          <p className="eyebrow">What people say</p>
+          <h2>Loved by creators and hosts.</h2>
+        </Reveal>
+        <RevealGroup className="testimonial-grid">
           {data.testimonials.map((t) => (
-            <blockquote key={t.name}>
+            <motion.blockquote key={t.name} variants={fadeUp}>
               <p>{t.quote}</p>
               <footer>
                 {t.name}
                 <span>{t.role}</span>
               </footer>
-            </blockquote>
+            </motion.blockquote>
           ))}
-        </div>
+        </RevealGroup>
       </section>
     </>
   );
