@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useStore } from "../store.jsx";
 import { useAuth } from "../auth.jsx";
+import { apiRequest } from "../api.js";
 import { money } from "../utils.js";
 
 const TABS = [
@@ -225,12 +226,8 @@ export default function Admin() {
     let alive = true;
     setLoadingAdmin(true);
     setAdminError("");
-    fetch("/api/admin/data", { credentials: "include" })
-      .then(async (response) => {
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(payload.error || "Unable to load admin data.");
-        if (alive) setAdminPayload({ ...EMPTY_ADMIN, ...payload });
-      })
+    apiRequest("/api/admin/data", { method: "GET" })
+      .then((payload) => alive && setAdminPayload({ ...EMPTY_ADMIN, ...payload }))
       .catch((err) => alive && setAdminError(err.message || "Unable to load admin data."))
       .finally(() => alive && setLoadingAdmin(false));
     return () => {

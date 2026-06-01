@@ -1,20 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { apiRequest } from "./api.js";
 
 const AuthContext = createContext(null);
-
-async function adminRequest(path, options = {}) {
-  const response = await fetch(path, {
-    ...options,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || "Admin request failed.");
-  return data;
-}
 
 export function AuthProvider({ children }) {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -23,13 +10,16 @@ export function AuthProvider({ children }) {
 
   const refreshAdmin = useCallback(async () => {
     try {
-      const session = await adminRequest("/api/admin/session", { method: "GET" });
+      const session = await apiRequest("/api/admin/session", { method: "GET" });
       setIsAdmin(!!session.isAdmin);
       setAdminEmail(session.email || "");
       return !!session.isAdmin;
-    } catch {
+    } catch (err) {
       setIsAdmin(false);
       setAdminEmail("");
+      if (String(err?.message || "").includes("Failed to fetch")) {
+        setAdminEmail("");
+      }
       return false;
     } finally {
       setCheckingAdmin(false);
@@ -41,7 +31,7 @@ export function AuthProvider({ children }) {
   }, [refreshAdmin]);
 
   const signIn = useCallback(async (email, passcode) => {
-    const session = await adminRequest("/api/admin/login", {
+    const session = await apiRequest("/api/admin/login", {
       method: "POST",
       body: JSON.stringify({ email, passcode }),
     });
@@ -52,7 +42,7 @@ export function AuthProvider({ children }) {
 
   const signOut = useCallback(async () => {
     try {
-      await adminRequest("/api/admin/logout", { method: "POST" });
+      await apiRequest("/api/admin/logout", { method: "POST" });
     } catch {
       /* still clear local admin state if the network request fails */
     } finally {

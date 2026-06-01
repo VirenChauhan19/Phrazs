@@ -1,10 +1,6 @@
-const API_BASE = (import.meta.env.VITE_STRIPE_API_BASE || "").replace(/\/$/, "");
+import { apiUrl } from "./api.js";
 const PENDING_KEY = "phrazs_pending_checkout_v1";
 const COMPLETED_KEY = "phrazs_completed_checkout_sessions_v1";
-
-function apiUrl(path) {
-  return `${API_BASE}${path}`;
-}
 
 function readJson(key, fallback) {
   try {

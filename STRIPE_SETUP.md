@@ -47,7 +47,7 @@ Use any future expiration date, any three-digit CVC, and any ZIP code.
 The frontend can be static, but `/api/create-checkout-session` and `/api/checkout-session` must run on a real server or serverless function with `STRIPE_SECRET_KEY` configured privately. If the API is on a different domain, set this in the frontend environment before building:
 
 ```bash
-VITE_STRIPE_API_BASE=https://your-api-domain.com
+VITE_API_BASE=https://your-api-domain.com
 ```
 
 The local API records paid Stripe bookings in server memory so they appear in the secured admin dashboard during the same server run. For production-grade fulfillment, add a Stripe webhook for `checkout.session.completed` and persist bookings in a database.
