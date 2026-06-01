@@ -34,6 +34,7 @@ export default function Home() {
   ];
 
   const headline = ["Find", "the", "perfect", "backdrop"];
+  const marquee = ["Studios", "Lofts", "Rooftops", "Kitchens", "Galleries", "Warehouses", "Gardens", "Mansions", "Cafés", "Penthouses"];
 
   return (
     <>
@@ -135,6 +136,20 @@ export default function Home() {
         </motion.div>
       </section>
 
+      <div className="marquee" aria-hidden="true">
+        <div className="marquee__track">
+          {[0, 1].map((k) => (
+            <div className="marquee__group" key={k}>
+              {marquee.map((w) => (
+                <span key={w + k}>
+                  {w} <i>✦</i>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
       <section className="section">
         <Reveal className="section-heading">
           <div>
@@ -192,11 +207,12 @@ export default function Home() {
             See the map →
           </Link>
         </Reveal>
-        <RevealGroup className="property-grid">
+        <RevealGroup className="feature-rail">
           {featured.map((item) => (
             <PropertyCard key={item.id} item={item} />
           ))}
         </RevealGroup>
+        <p className="rail-hint">Drag or scroll to explore →</p>
       </section>
 
       <section className="testimonial-band">

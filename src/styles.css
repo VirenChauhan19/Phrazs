@@ -190,10 +190,12 @@ h3 { font-size: 1.18rem; font-weight: 600; letter-spacing: -0.01em; }
 /* ---------- Hero ---------- */
 .hero {
   position: relative;
-  min-height: calc(100vh - 76px);
-  display: grid;
-  align-items: center;
-  padding: clamp(56px, 8vw, 96px) clamp(18px, 6vw, 96px);
+  min-height: calc(100svh - 78px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: clamp(40px, 6vw, 72px) clamp(18px, 6vw, 96px) clamp(28px, 4vw, 48px);
   overflow: hidden;
 }
 .hero::after {
@@ -1130,13 +1132,14 @@ table.clickable tbody tr:focus-visible { outline: 2px solid #2271b1; outline-off
    ============================================================ */
 
 /* Animated hero headline */
-.hero-content { width: min(900px, 100%); }
+.hero-content { width: min(960px, 100%); }
 .hero-title {
-  margin: 6px 0 0;
-  font-size: clamp(2.7rem, 6.4vw, 5.4rem);
-  line-height: 0.98;
-  letter-spacing: -0.02em;
-  font-weight: 500;
+  margin: 10px 0 0;
+  font-size: clamp(3.2rem, 8.2vw, 7rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  font-weight: 540;
+  text-wrap: balance;
 }
 .hero-title span { display: inline-block; will-change: transform; }
 .hero-title .accent-word em,
@@ -1160,12 +1163,9 @@ table.clickable tbody tr:focus-visible { outline: 2px solid #2271b1; outline-off
   text-transform: uppercase;
 }
 
-/* Floating stats strip at the foot of the hero */
+/* Stats strip anchored to the foot of the hero (in-flow, so content sits high) */
 .hero-stats {
-  position: absolute;
-  left: clamp(18px, 6vw, 96px);
-  right: clamp(18px, 6vw, 96px);
-  bottom: clamp(20px, 3.5vw, 40px);
+  position: relative;
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
@@ -1253,6 +1253,66 @@ table.clickable tbody tr:focus-visible { outline: 2px solid #2271b1; outline-off
 }
 
 @media (max-width: 720px) {
-  .hero-stats { position: static; margin-top: 28px; }
   .hero { min-height: auto; }
 }
+
+/* Scrolling marquee band between sections */
+.marquee {
+  overflow: hidden;
+  padding: 22px 0;
+  background: var(--espresso);
+  border-top: 1px solid rgba(247, 242, 233, 0.08);
+  border-bottom: 1px solid rgba(247, 242, 233, 0.08);
+}
+.marquee__track { display: flex; width: max-content; animation: marquee-scroll 32s linear infinite; }
+.marquee:hover .marquee__track { animation-play-state: paused; }
+.marquee__group { display: flex; flex-shrink: 0; }
+.marquee__group span {
+  display: inline-flex;
+  align-items: center;
+  gap: 28px;
+  padding: 0 28px;
+  color: var(--paper);
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  font-weight: 500;
+  font-style: italic;
+  white-space: nowrap;
+}
+.marquee__group span i { color: var(--accent-bright); font-style: normal; }
+@keyframes marquee-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Horizontal snap rail for featured spaces */
+.feature-rail {
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 4px 4px 18px;
+  margin: 0 -4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.feature-rail::-webkit-scrollbar { height: 8px; }
+.feature-rail::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
+.feature-rail .property-card {
+  flex: 0 0 min(360px, 82vw);
+  scroll-snap-align: start;
+}
+.rail-hint {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Bolder section headings */
+.section-heading h2,
+.steps-band h2,
+.testimonial-band h2 { font-size: clamp(2.2rem, 4.6vw, 4rem); line-height: 0.98; }
+
+/* Taller, more dramatic category tiles with overlaid label */
+.category-tile { min-height: 380px; }
+.category-tile img { height: 240px; }
