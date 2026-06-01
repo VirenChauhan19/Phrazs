@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useBookingUI } from "../booking-ui.jsx";
 import { useStore } from "../store.jsx";
 import { useUserAuth } from "../user-auth.jsx";
+import { motion } from "../motion.jsx";
 import {
   clearPendingCheckout,
   getCheckoutSession,
@@ -100,7 +101,16 @@ export default function CheckoutSuccess() {
 
   return (
     <section className="section checkout-result">
-      <div>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+        <motion.span
+          className={`checkout-emblem ${state.status}`}
+          initial={{ scale: 0, rotate: -12 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 240, damping: 16, delay: 0.15 }}
+          aria-hidden="true"
+        >
+          {state.status === "success" ? "✓" : state.status === "error" ? "!" : "…"}
+        </motion.span>
         <p className="eyebrow">Stripe checkout</p>
         <h1>{state.status === "success" ? "You're booked!" : state.status === "error" ? "Checkout needs attention" : "Confirming payment"}</h1>
         <p className="lead">{state.message}</p>
@@ -128,7 +138,7 @@ export default function CheckoutSuccess() {
             Explore spaces
           </Link>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -1344,3 +1344,21 @@ table.clickable tbody tr:focus-visible { outline: 2px solid #2271b1; outline-off
 @media (max-width: 720px) {
   .gallery-main, .gallery-main img { max-height: 360px; height: 360px; }
 }
+
+/* Checkout result emblem */
+.checkout-emblem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  box-shadow: 0 14px 30px -10px rgba(14, 122, 95, 0.7);
+}
+.checkout-emblem.error { background: var(--clay); box-shadow: 0 14px 30px -10px rgba(177, 106, 77, 0.6); }
+.checkout-emblem.loading { background: var(--sun); box-shadow: 0 14px 30px -10px rgba(217, 154, 54, 0.6); }
