@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useStore } from "../store.jsx";
 import PropertyCard from "../components/PropertyCard.jsx";
 import MapView from "../components/MapView.jsx";
+import { motion, RevealGroup, fadeUp } from "../motion.jsx";
 
 export default function Explore() {
   const { listings } = useStore();
@@ -109,19 +110,20 @@ export default function Explore() {
         <div className="explore-results">
           <p className="results-count">{filtered.length} space{filtered.length === 1 ? "" : "s"} found</p>
           {filtered.length ? (
-            <div className="property-grid two">
+            <RevealGroup className="property-grid two" gap={0.05} amount={0.02}>
               {filtered.map((item) => (
-                <div
+                <motion.div
                   key={item.id}
                   id={`result-${item.id}`}
+                  variants={fadeUp}
                   className={activeId === item.id ? "hl" : ""}
                   onMouseEnter={() => setActiveId(item.id)}
                   onMouseLeave={() => setActiveId(null)}
                 >
                   <PropertyCard item={item} />
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </RevealGroup>
           ) : (
             <p className="empty-state">No spaces match that search yet. Try a different keyword or category.</p>
           )}

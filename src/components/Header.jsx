@@ -22,7 +22,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   // "signin" / "signup" = guest user accounts (Supabase). "admin" = owner passcode.
-  const [mode, setMode] = useState(userAuth.enabled ? "signin" : "admin");
+  const [mode, setMode] = useState("signin");
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [info, setInfo] = useState("");
   const [error, setError] = useState("");
@@ -38,7 +38,7 @@ export default function Header() {
   ];
 
   const openAuth = (nextMode) => {
-    setMode(nextMode || (userAuth.enabled ? "signin" : "admin"));
+    setMode(nextMode || "signin");
     setError("");
     setInfo("");
     setAuthOpen(true);
@@ -52,19 +52,35 @@ export default function Header() {
     setForm({ name: "", email: "", phone: "", password: "" });
   };
 
+  // One sign-in for everyone. Regular users authenticate via Supabase; the owner
+  // simply uses the same form — if Supabase doesn't recognize them we try the
+  // owner passcode, and on success the Admin tab appears automatically.
+  const signInEveryone = async (email, password) => {
+    let userErr = null;
+    if (userAuth.enabled) {
+      try {
+        await userAuth.signIn(email, password);
+        return "/profile";
+      } catch (err) {
+        userErr = err;
+      }
+    }
+    try {
+      const isOwner = await adminSignIn(email, password);
+      if (isOwner) return "/admin";
+    } catch {
+      /* not the owner — fall through to the user error */
+    }
+    throw userErr || new Error("That email or password is not recognized.");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setBusy(true);
     setError("");
     setInfo("");
     try {
-      if (mode === "admin") {
-        const ok = await adminSignIn(form.email, form.password);
-        if (ok) {
-          closeAuth();
-          navigate("/admin");
-        }
-      } else if (mode === "signup") {
+      if (mode === "signup") {
         const { needsConfirmation } = await userAuth.signUp(form);
         if (needsConfirmation) {
           setInfo("Account created! Check your email to confirm, then sign in.");
@@ -75,9 +91,9 @@ export default function Header() {
           navigate("/profile");
         }
       } else {
-        await userAuth.signIn(form.email, form.password);
+        const dest = await signInEveryone(form.email, form.password);
         closeAuth();
-        navigate("/profile");
+        navigate(dest);
       }
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
@@ -96,12 +112,10 @@ export default function Header() {
   const titles = {
     signin: "Welcome back",
     signup: "Create your account",
-    admin: "Owner sign in",
   };
   const subtitles = {
     signin: "Sign in to see your bookings and manage your profile.",
     signup: "Join Phrazs to book spaces and track your trips.",
-    admin: "Sign in with the owner credentials to unlock the Admin dashboard.",
   };
 
   return (
@@ -166,18 +180,16 @@ export default function Header() {
               ✕
             </button>
 
-            {mode !== "admin" && userAuth.enabled && (
-              <div className="auth-tabs" role="tablist">
-                <button type="button" role="tab" aria-selected={mode === "signin"} className={mode === "signin" ? "on" : ""} onClick={() => { setMode("signin"); setError(""); }}>
-                  Sign In
-                </button>
-                <button type="button" role="tab" aria-selected={mode === "signup"} className={mode === "signup" ? "on" : ""} onClick={() => { setMode("signup"); setError(""); }}>
-                  Create Account
-                </button>
-              </div>
-            )}
+            <div className="auth-tabs" role="tablist">
+              <button type="button" role="tab" aria-selected={mode === "signin"} className={mode === "signin" ? "on" : ""} onClick={() => { setMode("signin"); setError(""); }}>
+                Sign In
+              </button>
+              <button type="button" role="tab" aria-selected={mode === "signup"} className={mode === "signup" ? "on" : ""} onClick={() => { setMode("signup"); setError(""); }}>
+                Create Account
+              </button>
+            </div>
 
-            <p className="eyebrow">{mode === "admin" ? "Owner Access" : "Phrazs Account"}</p>
+            <p className="eyebrow">Phrazs Account</p>
             <h2>{titles[mode]}</h2>
             <p className="muted small" style={{ margin: "-6px 0 4px" }}>{subtitles[mode]}</p>
 
@@ -198,7 +210,7 @@ export default function Header() {
                 Email
                 <input
                   type="email"
-                  placeholder={mode === "admin" ? "contact@phrazs.com" : "you@example.com"}
+                  placeholder="you@example.com"
                   value={form.email}
                   onChange={(e) => set({ email: e.target.value })}
                   autoFocus={mode !== "signup"}
@@ -209,10 +221,10 @@ export default function Header() {
                 Password
                 <input
                   type="password"
-                  placeholder={mode === "admin" ? "Admin passcode" : mode === "signup" ? "At least 6 characters" : "Your password"}
+                  placeholder={mode === "signup" ? "At least 6 characters" : "Your password"}
                   value={form.password}
                   onChange={(e) => set({ password: e.target.value })}
-                  minLength={mode === "admin" ? undefined : 6}
+                  minLength={mode === "signup" ? 6 : undefined}
                   required
                 />
               </label>
@@ -222,24 +234,6 @@ export default function Header() {
               {info && <p className="form-note" style={{ color: "var(--accent-dark)" }}>{info}</p>}
               {error && <p className="form-note shake">{error}</p>}
             </form>
-
-            {mode !== "admin" ? (
-              <p className="form-note muted">
-                Owner?{" "}
-                <button type="button" className="text-link" onClick={() => { setMode("admin"); setError(""); setInfo(""); }}>
-                  Sign in to the dashboard
-                </button>
-              </p>
-            ) : userAuth.enabled ? (
-              <p className="form-note muted">
-                Not the owner?{" "}
-                <button type="button" className="text-link" onClick={() => { setMode("signin"); setError(""); }}>
-                  Sign in to your account
-                </button>
-              </p>
-            ) : (
-              <p className="form-note muted">Admin credentials are verified by the backend.</p>
-            )}
           </div>
         </div>
         ,
