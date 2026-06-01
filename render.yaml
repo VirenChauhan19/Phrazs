@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: phrazs-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: node server/stripe-server.mjs
+    envVars:
+      # Render assigns PORT automatically; the server now reads process.env.PORT.
+      - key: SITE_URL
+        value: https://virenchauhan19.github.io
+      # Secrets — set these values in the Render dashboard (Environment tab).
+      # They are intentionally NOT committed here.
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSCODE
+        sync: false
+      - key: ADMIN_SESSION_SECRET
+        sync: false
+      # STRIPE_SECRET_KEY intentionally omitted -> backend runs in demo mode
+      # (simulated checkout, no real charges). Add it in the Render dashboard
+      # later to switch on live Stripe payments.

@@ -6,7 +6,7 @@ import PHRAZS_DATA from "../src/data.js";
 import PHRAZS_MEDIA from "../src/media.js";
 import { ADMIN_DATA } from "./admin-data.mjs";
 
-const PORT = Number(process.env.STRIPE_SERVER_PORT || 4242);
+const PORT = Number(process.env.PORT || process.env.STRIPE_SERVER_PORT || 4242);
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || loadEnv("STRIPE_SECRET_KEY");
 const SITE_URL = (process.env.SITE_URL || loadEnv("SITE_URL") || "http://127.0.0.1:5173").replace(/\/$/, "");
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || loadEnv("ADMIN_EMAIL") || "").trim().toLowerCase();
@@ -45,8 +45,12 @@ async function readJson(req) {
 }
 
 function cookieHeader(value, maxAgeSeconds) {
-  const secure = SITE_URL.startsWith("https://") ? "; Secure" : "";
-  return `${ADMIN_COOKIE}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}${secure}`;
+  // When the frontend and API live on different domains (e.g. GitHub Pages -> Render),
+  // the session cookie is third-party and must be SameSite=None; Secure to be sent at all.
+  const isHttps = SITE_URL.startsWith("https://");
+  const sameSite = isHttps ? "None" : "Lax";
+  const secure = isHttps ? "; Secure" : "";
+  return `${ADMIN_COOKIE}=${value}; Path=/; HttpOnly; SameSite=${sameSite}; Max-Age=${maxAgeSeconds}${secure}`;
 }
 
 function sign(payload) {
@@ -164,6 +168,15 @@ async function createCheckoutSession(req, res) {
     return;
   }
 
+  // Demo mode: no Stripe key configured yet. Simulate a successful Stripe Checkout
+  // session so the booking + payment flow works end to end. Replace by setting
+  // STRIPE_SECRET_KEY to switch to real Stripe charges.
+  if (!STRIPE_SECRET_KEY) {
+    const id = `cs_demo_${randomBytes(12).toString("hex")}`;
+    json(res, 200, { id, url: `${SITE_URL}/#/checkout-success?session_id=${id}` });
+    return;
+  }
+
   const params = new URLSearchParams();
   params.set("mode", "payment");
   params.set("customer_email", booking.guestEmail);
@@ -192,14 +205,23 @@ async function createCheckoutSession(req, res) {
 }
 
 async function retrieveCheckoutSession(req, res) {
-  if (!STRIPE_SECRET_KEY) {
-    json(res, 500, { error: "Missing STRIPE_SECRET_KEY. Add it to .env or your hosting environment." });
-    return;
-  }
   const url = new URL(req.url, `http://${req.headers.host}`);
   const sessionId = url.searchParams.get("session_id");
   if (!sessionId || !sessionId.startsWith("cs_")) {
     json(res, 400, { error: "Missing or invalid Stripe Checkout session id." });
+    return;
+  }
+
+  // Demo mode: confirm the simulated session as paid (stateless, so it survives
+  // server restarts). The booking details are carried in the browser, not here.
+  if (!STRIPE_SECRET_KEY || sessionId.startsWith("cs_demo_")) {
+    json(res, 200, {
+      id: sessionId,
+      status: "complete",
+      payment_status: "paid",
+      payment_intent: `pi_demo_${sessionId.slice(-12)}`,
+      metadata: {},
+    });
     return;
   }
 
