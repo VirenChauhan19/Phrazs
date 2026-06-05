@@ -7,6 +7,7 @@ import { StoreProvider } from "./store.jsx";
 import { AuthProvider } from "./auth.jsx";
 import { UserAuthProvider } from "./user-auth.jsx";
 import "./styles.css";
+import "./mobile/mobile.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>

@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import { BookingUIProvider } from "./booking-ui.jsx";
+import useIsMobile from "./mobile/useIsMobile.js";
+import MobileApp from "./mobile/MobileApp.jsx";
 import Home from "./pages/Home.jsx";
 import Explore from "./pages/Explore.jsx";
 import ListingDetail from "./pages/ListingDetail.jsx";
@@ -92,10 +94,10 @@ function ScrollReveal({ pathname }) {
   return null;
 }
 
-export default function App() {
+function DesktopApp() {
   const location = useLocation();
   return (
-    <BookingUIProvider>
+    <>
       <ScrollToTop />
       <ScrollReveal pathname={location.pathname} />
       <Header />
@@ -118,6 +120,15 @@ export default function App() {
         </div>
       </main>
       <Footer />
+    </>
+  );
+}
+
+export default function App() {
+  const isMobile = useIsMobile();
+  return (
+    <BookingUIProvider>
+      {isMobile ? <MobileApp /> : <DesktopApp />}
     </BookingUIProvider>
   );
 }
