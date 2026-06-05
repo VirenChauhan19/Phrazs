@@ -59,13 +59,33 @@ function FocusActive({ activeId, points }) {
   return null;
 }
 
-export default function MapView({ listings, activeId, onHover }) {
+export default function MapView({ listings, activeId, onHover, onSelect, showPopups = true }) {
   const navigate = useNavigate();
   const { openBooking } = useBookingUI();
   const [map, setMap] = useState(null);
 
   const points = listings.filter((l) => typeof l.lat === "number" && typeof l.lng === "number");
   const center = points.length ? [points[0].lat, points[0].lng] : FALLBACK_CENTER;
+
+  // Leaflet renders grey tiles if its container is resized (or revealed) after
+  // init — common on mobile when the map mounts inside an animating/toggled
+  // view. Recompute size on mount and whenever the viewport changes.
+  useEffect(() => {
+    if (!map) return;
+    const fix = () => map.invalidateSize({ animate: false });
+    const t = setTimeout(fix, 200);
+    window.addEventListener("resize", fix);
+    window.addEventListener("orientationchange", fix);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", fix);
+      window.removeEventListener("orientationchange", fix);
+    };
+  }, [map]);
+
+  // Tapping a pin selects it (used by the mobile map carousel). Falls back to
+  // the hover handler so desktop behaviour is unchanged.
+  const select = onSelect || onHover;
 
   const fitAll = useCallback(() => {
     if (!map || !points.length) return;
@@ -103,12 +123,14 @@ export default function MapView({ listings, activeId, onHover }) {
             eventHandlers={{
               mouseover: () => onHover?.(item.id),
               mouseout: () => onHover?.(null),
+              click: () => select?.(item.id),
             }}
           >
             <Tooltip direction="top" offset={[0, -8]} opacity={1} className="map-tip">
               <strong>{item.title}</strong>
               <span>{item.priceLabel}</span>
             </Tooltip>
+            {showPopups && (
             <Popup autoPan>
               <div className="map-popup">
                 <img src={item.image} alt={item.title} />
@@ -132,6 +154,7 @@ export default function MapView({ listings, activeId, onHover }) {
                 </div>
               </div>
             </Popup>
+            )}
           </Marker>
         ))}
       </MapContainer>

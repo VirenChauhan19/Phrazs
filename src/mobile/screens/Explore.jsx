@@ -5,6 +5,7 @@ import { useStore } from "../../store.jsx";
 import { useBookingUI } from "../../booking-ui.jsx";
 import { stagger, fadeUp } from "../../motion.jsx";
 import Tilt3D from "../Tilt3D.jsx";
+import MobileMap from "../MobileMap.jsx";
 import { useSaved } from "../useSaved.js";
 
 export default function Explore() {
@@ -16,6 +17,8 @@ export default function Explore() {
 
   const [query, setQuery] = useState(params.get("q") || "");
   const [category, setCategory] = useState(params.get("category") || "All");
+  const [view, setView] = useState("list"); // "list" | "map"
+  const [activeId, setActiveId] = useState(null);
 
   // Keep local state in sync when arriving from a deep link / category tap.
   useEffect(() => {
@@ -51,7 +54,7 @@ export default function Explore() {
   };
 
   return (
-    <div className="m-screen m-explore">
+    <div className={`m-screen m-explore ${view === "map" ? "is-map" : ""}`}>
       <header className="m-explore__head">
         <h1>Explore spaces</h1>
         <form className="m-searchbar" onSubmit={onSearch}>
@@ -71,8 +74,21 @@ export default function Explore() {
         </div>
       </header>
 
-      <p className="m-count">{results.length} {results.length === 1 ? "space" : "spaces"}</p>
+      <div className="m-explore__bar">
+        <p className="m-count">{results.length} {results.length === 1 ? "space" : "spaces"}</p>
+        <div className="m-toggle" role="tablist" aria-label="View">
+          <button type="button" role="tab" aria-selected={view === "list"} className={view === "list" ? "on" : ""} onClick={() => setView("list")}>
+            List
+          </button>
+          <button type="button" role="tab" aria-selected={view === "map"} className={view === "map" ? "on" : ""} onClick={() => setView("map")}>
+            Map
+          </button>
+        </div>
+      </div>
 
+      {view === "map" ? (
+        <MobileMap items={results} activeId={activeId} setActiveId={setActiveId} />
+      ) : (
       <motion.div
         className="m-grid"
         variants={stagger(0.06)}
@@ -113,8 +129,9 @@ export default function Explore() {
           </motion.div>
         ))}
       </motion.div>
+      )}
 
-      {results.length === 0 && (
+      {view === "list" && results.length === 0 && (
         <div className="m-empty">
           <p>No spaces match that search.</p>
           <button type="button" className="m-btn" onClick={() => { setQuery(""); pickCategory("All"); }}>
@@ -123,7 +140,7 @@ export default function Explore() {
         </div>
       )}
 
-      <div className="m-spacer" />
+      {view === "list" && <div className="m-spacer" />}
     </div>
   );
 }
