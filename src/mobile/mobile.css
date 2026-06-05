@@ -32,9 +32,9 @@
    recomposited inside a global 3D context every frame — which is what makes
    panning/zooming feel smooth. */
 
-.m-screen { padding: 18px 18px calc(var(--tab-h) + 28px); }
-.m-spacer { height: 20px; }
-.m-spacer--lg { height: 40px; }
+.m-screen { padding: 16px 18px calc(var(--tab-h) + 20px); }
+.m-spacer { height: 4px; }
+.m-spacer--lg { height: 24px; }
 .m-sub { margin: 4px 0 0; color: var(--muted); font-size: 0.92rem; }
 
 .m-eyebrow {
@@ -104,13 +104,13 @@
 .m-searchbar button[type="submit"]:active { transform: scale(0.9); }
 
 /* ---------- Discover ---------- */
-.m-greet { display: flex; align-items: flex-end; justify-content: space-between; margin: 6px 0 16px; }
-.m-greet h1 { font-size: 2.1rem; line-height: 1.05; max-width: 11ch; }
+.m-greet { display: flex; align-items: flex-end; justify-content: space-between; margin: 2px 0 12px; }
+.m-greet h1 { font-size: 2rem; line-height: 1.04; max-width: 11ch; }
 .m-greet em { color: var(--accent-dark); font-style: italic; }
 
-.m-block { margin-top: 30px; }
-.m-block__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
-.m-block__head h2 { font-size: 1.4rem; }
+.m-block { margin-top: 22px; }
+.m-block__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 11px; }
+.m-block__head h2 { font-size: 1.35rem; }
 .m-hint, .m-count { color: var(--muted); font-size: 0.8rem; font-family: var(--mono); letter-spacing: 0.04em; }
 .m-textlink { border: 0; background: none; color: var(--accent-dark); font-weight: 600; font-size: 0.88rem; cursor: pointer; }
 
@@ -118,9 +118,9 @@
 .deck { user-select: none; }
 .deck__stage {
   position: relative;
-  height: 62vw;
-  max-height: 420px;
-  min-height: 300px;
+  height: 56vw;
+  max-height: 360px;
+  min-height: 270px;
   transform-style: preserve-3d;
   perspective: 1200px;
 }
@@ -193,7 +193,7 @@
 .deck__stamp--like { left: 22px; color: var(--accent-bright); transform: rotate(-12deg); }
 .deck__stamp--nope { right: 22px; color: var(--clay); transform: rotate(12deg); }
 
-.deck__controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
+.deck__controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 14px; }
 .deck__btn {
   height: 50px;
   min-width: 50px;
@@ -231,12 +231,12 @@
 .m-chips button.is-on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
 /* ---------- Category grid ---------- */
-.m-cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.m-cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .m-cat {
   position: relative;
   border: 0;
   padding: 0;
-  height: 124px;
+  height: 110px;
   border-radius: var(--r-md);
   overflow: hidden;
   cursor: pointer;
@@ -266,10 +266,10 @@
 .m-rail__body span { color: var(--accent-dark); font-size: 0.85rem; font-weight: 600; }
 
 /* ---------- CTA ---------- */
-.m-cta { margin-top: 34px; }
+.m-cta { margin-top: 24px; }
 .m-cta__card {
   border-radius: var(--r-lg);
-  padding: 28px 24px 26px;
+  padding: 24px 22px 22px;
   color: #fff;
   background:
     radial-gradient(120% 120% at 0% 0%, rgba(20, 168, 131, 0.55), transparent 55%),

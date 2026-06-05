@@ -12,7 +12,6 @@ export default function Discover() {
   const [query, setQuery] = useState("");
 
   const featured = listings.slice(0, 8);
-  const rail = listings.slice(2, 9);
   const tags = data.tags.slice(0, 8);
 
   const submit = (e) => {
@@ -100,23 +99,6 @@ export default function Discover() {
             </motion.button>
           ))}
         </motion.div>
-      </section>
-
-      <section className="m-block">
-        <div className="m-block__head">
-          <h2>Top rated</h2>
-        </div>
-        <div className="m-rail">
-          {rail.map((item) => (
-            <Tilt3D key={item.id} className="m-rail__card" max={10} onClick={() => navigate(`/listing/${item.id}`)}>
-              <img className="lift-1" src={item.image} alt={item.title} loading="lazy" />
-              <div className="m-rail__body lift-2">
-                <strong>{item.title}</strong>
-                <span>{item.priceLabel} / hr</span>
-              </div>
-            </Tilt3D>
-          ))}
-        </div>
       </section>
 
       <section className="m-cta">
