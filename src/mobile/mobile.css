@@ -17,6 +17,14 @@
   overflow-x: clip;
 }
 
+/* The desktop site pins the background (background-attachment: fixed) and lays a
+   fixed film-grain layer over everything. On phones a fixed background is a
+   notorious scroll-perf killer (and effectively unsupported on iOS Safari), so
+   the page can feel stuck. Let the background scroll with the content here. */
+@media (max-width: 768px) {
+  body { background-attachment: scroll; }
+}
+
 /* The page-transition perspective is baked into each animating element via
    framer's `transformPerspective` (see MobileApp), NOT applied to a shared
    ancestor. Keeping the stage free of `perspective`/`will-change: transform`
@@ -395,7 +403,7 @@
   margin-top: -28px;
   border-radius: 28px 28px 0 0;
   background: var(--paper);
-  padding: 26px 20px 0;
+  padding: 26px 20px calc(96px + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -10px 30px -18px rgba(28, 26, 21, 0.4);
 }
 .m-stats { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 26px; padding: 0; }

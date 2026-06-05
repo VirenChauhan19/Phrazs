@@ -117,6 +117,7 @@ function FrontCard({ item, dir, reduce, saved, onSave, onSwipe, onOpen }) {
         transition: { duration: 0.32, ease: EASE },
       })}
       drag={reduce ? false : "x"}
+      dragDirectionLock
       dragSnapToOrigin
       dragElastic={0.7}
       onDragStart={() => (moved.current = true)}
