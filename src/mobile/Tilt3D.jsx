@@ -55,7 +55,10 @@ export default function Tilt3D({
     <motion.div
       ref={ref}
       className={`tilt3d ${className}`}
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d", ...style }}
+      // Perspective is baked into the element itself (not inherited from an
+      // ancestor) so the tilt reads as 3D without forcing a global 3D context —
+      // that keeps siblings like the Leaflet map on a clean, fast 2D layer.
+      style={{ rotateX, rotateY, transformPerspective: 600, transformStyle: "preserve-3d", ...style }}
       whileTap={{ scale: 0.985 }}
       whileHover={{ scale }}
       onPointerMove={track}

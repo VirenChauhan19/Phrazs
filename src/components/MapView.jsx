@@ -105,12 +105,22 @@ export default function MapView({ listings, activeId, onHover, onSelect, showPop
         scrollWheelZoom
         zoomControl={false}
         className="leaflet-map"
+        // Smoother feel: fractional zoom steps for buttery pinch/zoom, and a
+        // longer glide on flick-pans (inertia is on by default).
+        zoomSnap={0.25}
+        zoomDelta={0.5}
+        wheelPxPerZoomLevel={100}
+        inertiaDeceleration={2600}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           subdomains="abcd"
           maxZoom={20}
+          // Keep more off-screen tiles cached and don't thrash tile requests
+          // mid-pinch → far fewer grey flashes while panning/zooming.
+          keepBuffer={6}
+          updateWhenZooming={false}
         />
         <FitBounds points={points} />
         <FocusActive activeId={activeId} points={points} />

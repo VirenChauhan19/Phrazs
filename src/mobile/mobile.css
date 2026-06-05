@@ -17,12 +17,12 @@
   overflow-x: clip;
 }
 
-/* 3D perspective stage for page transitions + tilt children.
-   Perspective / transform / will-change all create a containing block for
-   position:fixed descendants, which would break the listing's floating
-   book bar. Immersive (full) routes therefore opt out via :not(.is-full). */
-.mobile-shell:not(.is-full) .m-stage { perspective: 1500px; }
-.mobile-shell:not(.is-full) .m-page { transform-style: preserve-3d; will-change: transform; }
+/* The page-transition perspective is baked into each animating element via
+   framer's `transformPerspective` (see MobileApp), NOT applied to a shared
+   ancestor. Keeping the stage free of `perspective`/`will-change: transform`
+   means the Leaflet map renders on a normal 2D layer instead of being
+   recomposited inside a global 3D context every frame — which is what makes
+   panning/zooming feel smooth. */
 
 .m-screen { padding: 18px 18px calc(var(--tab-h) + 28px); }
 .m-spacer { height: 20px; }

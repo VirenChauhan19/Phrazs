@@ -19,14 +19,17 @@ import Blog from "../pages/Blog.jsx";
 import Terms from "../pages/Terms.jsx";
 import Admin from "../pages/Admin.jsx";
 
+// 3D push transition. Perspective is baked into the element (transformPerspective)
+// rather than inherited from an ancestor, so no global 3D context is created.
 const pageVariants = {
-  initial: { opacity: 0, y: 24, scale: 0.97, rotateX: 9 },
-  enter: { opacity: 1, y: 0, scale: 1, rotateX: 0, transition: { duration: 0.5, ease: EASE } },
-  exit: { opacity: 0, y: -16, scale: 0.97, rotateX: -6, transition: { duration: 0.28, ease: EASE } },
+  initial: { opacity: 0, y: 24, scale: 0.97, rotateX: 9, transformPerspective: 1200 },
+  enter: { opacity: 1, y: 0, scale: 1, rotateX: 0, transformPerspective: 1200, transition: { duration: 0.5, ease: EASE } },
+  exit: { opacity: 0, y: -16, scale: 0.97, rotateX: -6, transformPerspective: 1200, transition: { duration: 0.28, ease: EASE } },
 };
 
-// Immersive screens (listing) own position:fixed chrome, so their page wrapper
-// must stay transform-free — animate opacity only to avoid trapping fixed kids.
+// Flat (opacity-only) transition for screens that must stay completely
+// transform-free: the listing (owns position:fixed chrome) and Explore (hosts
+// the Leaflet map — any ancestor transform makes pan/zoom janky).
 const fadeVariants = {
   initial: { opacity: 0 },
   enter: { opacity: 1, transition: { duration: 0.4, ease: EASE } },
@@ -62,6 +65,8 @@ export default function MobileApp() {
   }, [location.pathname]);
 
   const isFull = location.pathname.startsWith("/listing/"); // immersive screens hide the tab bar
+  // Screens that must render without any wrapper transform (fixed chrome / map).
+  const flat = isFull || location.pathname.startsWith("/explore");
 
   return (
     <div className={`mobile-shell ${isFull ? "is-full" : ""}`}>
@@ -70,7 +75,7 @@ export default function MobileApp() {
           <motion.div
             key={location.pathname}
             className="m-page"
-            variants={reduce ? undefined : isFull ? fadeVariants : pageVariants}
+            variants={reduce ? undefined : flat ? fadeVariants : pageVariants}
             initial="initial"
             animate="enter"
             exit="exit"
