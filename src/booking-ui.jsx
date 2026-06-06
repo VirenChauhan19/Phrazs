@@ -62,17 +62,44 @@ export function BookingUIProvider({ children }) {
     setProcessing(false);
   }, []);
 
+  // Lock the page behind the modal. `overflow: hidden` on <body> does NOT stop
+  // touch scrolling (the real scroller is <html>, and iOS ignores it anyway),
+  // which made the background slide and the modal look like it was "hovering".
+  // Pinning <body> with position:fixed locks it reliably on every platform.
+  // Depends only on `open` so it doesn't re-run (and jump) during payment.
+  useEffect(() => {
+    if (!open) return;
+    const body = document.body;
+    const scrollY = window.scrollY;
+    const prev = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    };
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    return () => {
+      Object.assign(body.style, prev);
+      window.scrollTo(0, scrollY);
+    };
+  }, [open]);
+
+  // Close on Escape (disabled mid-payment). Separate from the scroll lock so a
+  // `processing` change can't trigger a relock/scroll jump.
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
       if (e.key === "Escape" && !processing) closeBooking();
     };
     document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [open, processing, closeBooking]);
 
   const showToast = useCallback((message) => {
