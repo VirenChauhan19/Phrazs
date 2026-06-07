@@ -6,8 +6,6 @@ import { stagger, fadeUp, EASE } from "../../motion.jsx";
 import { useSaved } from "../useSaved.js";
 import Tilt3D from "../Tilt3D.jsx";
 
-const HEART = (saved) => (saved ? "♥" : "♡");
-
 export default function Discover() {
   const { listings, data } = useStore();
   const navigate = useNavigate();
@@ -17,31 +15,14 @@ export default function Discover() {
   const hero = listings[0];
   const quickTags = data.tags.slice(0, 10);
 
-  // Rails are built from real data (tags + location). Only rails with enough
-  // listings render, so the home never shows an empty or broken section.
-  const rails = useMemo(() => {
-    const byTag = (...tags) => {
-      const seen = new Set();
-      const out = [];
-      for (const item of listings) {
-        if (item.id === hero?.id) continue;
-        if (tags.some((t) => item.tags?.includes(t)) && !seen.has(item.id)) {
-          seen.add(item.id);
-          out.push(item);
-        }
-      }
-      return out;
-    };
-    const candidates = [
-      { key: "near", title: "Near Atlanta", items: listings.filter((l) => (l.city || "").includes("Atlanta") && l.id !== hero?.id) },
-      { key: "studios", title: "Photo & film studios", items: byTag("Photo Studios", "Studio Shoot", "Film Shoot") },
-      { key: "podcast", title: "Podcast & interviews", items: byTag("Podcast", "Interview Shoot") },
-      { key: "rooftop", title: "Rooftops & views", items: byTag("Rooftop") },
-      { key: "events", title: "Events & gatherings", items: byTag("Wedding Halls", "Birthday Party", "Backyard") },
-    ];
-    return candidates
-      .map((r) => ({ ...r, items: r.items.slice(0, 8) }))
-      .filter((r) => r.items.length >= 2);
+  const { trending, value } = useMemo(() => {
+    const rest = listings.filter((l) => l.id !== hero?.id);
+    const trending = rest.slice(0, 7);
+    const value = rest
+      .filter((l) => (Number(l.price) || Infinity) <= 150)
+      .sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0))
+      .slice(0, 8);
+    return { trending, value };
   }, [listings, hero?.id]);
 
   const submit = (e) => {
@@ -49,7 +30,8 @@ export default function Discover() {
     navigate(query.trim() ? `/explore?q=${encodeURIComponent(query.trim())}` : "/explore");
   };
 
-  const openSaved = (e, id) => {
+  const open = (id) => navigate(`/listing/${id}`);
+  const save = (e, id) => {
     e.stopPropagation();
     toggle(id);
   };
@@ -79,7 +61,7 @@ export default function Discover() {
           <button
             type="button"
             className="m-hero2__feature"
-            onClick={() => navigate(`/listing/${hero.id}`)}
+            onClick={() => open(hero.id)}
             aria-label={`Open ${hero.title}`}
           >
             <span className="m-hero2__tag">Featured space</span>
@@ -118,52 +100,51 @@ export default function Discover() {
         </div>
       </section>
 
-      {rails.map((rail) => (
-        <section className="m-block" key={rail.key}>
-          <div className="m-block__head">
-            <h2>{rail.title}</h2>
-            <button type="button" className="m-textlink" onClick={() => navigate("/explore")}>
-              See all
-            </button>
-          </div>
-          <div className="m-rail">
-            {rail.items.map((it) => {
-              const saved = isSaved(it.id);
-              return (
-                <div
-                  key={it.id}
-                  className="m-rail__card"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => navigate(`/listing/${it.id}`)}
-                  onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && navigate(`/listing/${it.id}`)}
+      {/* Trending — large image-overlay cards (premium hero-style moment). */}
+      <section className="m-block">
+        <div className="m-block__head">
+          <h2>Trending spaces</h2>
+          <button type="button" className="m-textlink" onClick={() => navigate("/explore")}>
+            See all
+          </button>
+        </div>
+        <div className="m-trail">
+          {trending.map((it) => {
+            const saved = isSaved(it.id);
+            return (
+              <div
+                key={it.id}
+                className="m-tcard"
+                role="button"
+                tabIndex={0}
+                onClick={() => open(it.id)}
+                onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && open(it.id)}
+              >
+                <img src={it.image} alt={it.title} loading="lazy" />
+                <span className="m-tcard__veil" aria-hidden="true" />
+                <button
+                  type="button"
+                  className={`m-tcard__heart ${saved ? "is-saved" : ""}`}
+                  onClick={(e) => save(e, it.id)}
+                  aria-label={saved ? "Remove from saved" : "Save space"}
                 >
-                  <div className="m-rail__media">
-                    <img src={it.image} alt={it.title} loading="lazy" />
-                    <button
-                      type="button"
-                      className={`m-rail__heart ${saved ? "is-saved" : ""}`}
-                      onClick={(e) => openSaved(e, it.id)}
-                      aria-label={saved ? "Remove from saved" : "Save space"}
-                    >
-                      {HEART(saved)}
-                    </button>
-                  </div>
-                  <div className="m-rail__body">
-                    <strong>{it.title}</strong>
-                    <span className="m-rail__loc">{it.city || "Atlanta, GA"}</span>
-                    <span className="m-rail__price">{it.priceLabel} <em>/hr</em></span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      ))}
+                  {saved ? "♥" : "♡"}
+                </button>
+                <span className="m-tcard__price">{it.priceLabel}<em>/hr</em></span>
+                <span className="m-tcard__body">
+                  <span className="m-tcard__cat">{it.category}</span>
+                  <strong>{it.title}</strong>
+                  <span className="m-tcard__loc">{it.city || "Atlanta, GA"}</span>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       <section className="m-block">
         <div className="m-block__head">
-          <h2>Categories</h2>
+          <h2>Explore by category</h2>
           <button type="button" className="m-textlink" onClick={() => navigate("/explore")}>
             See all
           </button>
@@ -191,6 +172,50 @@ export default function Discover() {
           ))}
         </motion.div>
       </section>
+
+      {/* Value — compact cards, deliberately a different shape from Trending. */}
+      {value.length >= 2 && (
+        <section className="m-block">
+          <div className="m-block__head">
+            <h2>Under $150 / hour</h2>
+            <button type="button" className="m-textlink" onClick={() => navigate("/explore")}>
+              See all
+            </button>
+          </div>
+          <div className="m-rail">
+            {value.map((it) => {
+              const saved = isSaved(it.id);
+              return (
+                <div
+                  key={it.id}
+                  className="m-rail__card"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => open(it.id)}
+                  onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && open(it.id)}
+                >
+                  <div className="m-rail__media">
+                    <img src={it.image} alt={it.title} loading="lazy" />
+                    <button
+                      type="button"
+                      className={`m-rail__heart ${saved ? "is-saved" : ""}`}
+                      onClick={(e) => save(e, it.id)}
+                      aria-label={saved ? "Remove from saved" : "Save space"}
+                    >
+                      {saved ? "♥" : "♡"}
+                    </button>
+                  </div>
+                  <div className="m-rail__body">
+                    <strong>{it.title}</strong>
+                    <span className="m-rail__loc">{it.city || "Atlanta, GA"}</span>
+                    <span className="m-rail__price">{it.priceLabel} <em>/hr</em></span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section className="m-cta">
         <Tilt3D className="m-cta__card" max={8}>
