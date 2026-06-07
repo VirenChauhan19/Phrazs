@@ -12,7 +12,14 @@ export default function Discover() {
   const [query, setQuery] = useState("");
 
   const featured = listings.slice(0, 8);
+  const spotlight = featured[1] || featured[0];
   const tags = data.tags.slice(0, 8);
+  const quickTags = ["Music Video", "Podcast", "Photo Studios", "Rooftop"].filter((tag) =>
+    data.tags.includes(tag)
+  );
+  const avgPrice = Math.round(
+    listings.reduce((sum, item) => sum + (Number(item.price) || 0), 0) / Math.max(listings.length, 1)
+  );
 
   const submit = (e) => {
     e.preventDefault();
@@ -22,37 +29,94 @@ export default function Discover() {
   return (
     <div className="m-screen m-discover">
       <motion.header
-        className="m-greet"
+        className="m-home-head"
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: EASE }}
       >
-        <div>
-          <p className="m-eyebrow">Phrazs</p>
-          <h1>
-            Find the perfect <em>backdrop</em>.
-          </h1>
+        <div className="m-home-brand">
+          <span className="m-home-brand__mark">P</span>
+          <div>
+            <strong>Phrazs</strong>
+            <span>Atlanta and beyond</span>
+          </div>
         </div>
+        <button type="button" className="m-home-head__action" onClick={() => navigate("/explore")}>Map</button>
       </motion.header>
 
-      <form className="m-searchbar" onSubmit={submit}>
+      <motion.section
+        className="m-home-hero"
+        initial={{ opacity: 0, y: 18, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.64, ease: EASE, delay: 0.06 }}
+      >
+        <div className="m-home-hero__copy">
+          <p className="m-eyebrow">Creative locations</p>
+          <h1>
+            Book a space that already feels like a <em>scene</em>.
+          </h1>
+          <p>Studios, homes, rooftops, and ready-to-shoot rooms for your next production.</p>
+        </div>
+
+        {spotlight && (
+          <button
+            type="button"
+            className="m-spotlight"
+            onClick={() => navigate(`/listing/${spotlight.id}`)}
+            aria-label={`Open ${spotlight.title}`}
+          >
+            <img src={spotlight.image} alt={spotlight.title} />
+            <span className="m-spotlight__veil" />
+            <span className="m-spotlight__body">
+              <span>{spotlight.category}</span>
+              <strong>{spotlight.title}</strong>
+              <em>{spotlight.priceLabel}</em>
+            </span>
+          </button>
+        )}
+
+        <div className="m-home-stats" aria-label="Marketplace highlights">
+          <span>
+            <strong>{listings.length}</strong>
+            spaces
+          </span>
+          <span>
+            <strong>{data.categories.length}</strong>
+            vibes
+          </span>
+          <span>
+            <strong>${avgPrice}</strong>
+            avg
+          </span>
+        </div>
+      </motion.section>
+
+      <form className="m-searchbar m-searchbar--home" onSubmit={submit}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
           <circle cx="11" cy="11" r="7" />
           <path d="M21 21l-4.3-4.3" />
         </svg>
         <input
           type="search"
-          placeholder="Studio, rooftop, kitchen…"
+          placeholder="Studio, rooftop, kitchen..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <button type="submit" aria-label="Search">→</button>
+        <button type="submit" aria-label="Search">Go</button>
       </form>
+
+      <div className="m-quickrail" aria-label="Popular searches">
+        {quickTags.map((tag) => (
+          <button key={tag} type="button" onClick={() => navigate(`/explore?q=${encodeURIComponent(tag)}`)}>
+            {tag}
+          </button>
+        ))}
+      </div>
 
       <section className="m-block">
         <div className="m-block__head">
-          <h2>Featured spaces</h2>
-          <span className="m-hint">swipe ↔</span>
+          <h2>Today's edit</h2>
+          <span className="m-hint">swipe</span>
         </div>
         <SwipeDeck items={featured} onOpen={(it) => navigate(`/listing/${it.id}`)} />
       </section>
@@ -74,7 +138,7 @@ export default function Discover() {
         <div className="m-block__head">
           <h2>Categories</h2>
           <button type="button" className="m-textlink" onClick={() => navigate("/explore")}>
-            See all →
+            See all
           </button>
         </div>
         <motion.div
