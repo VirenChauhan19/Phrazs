@@ -1,59 +1,97 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useStore } from "../../store.jsx";
 import { stagger, fadeUp, EASE } from "../../motion.jsx";
-import SwipeDeck from "../SwipeDeck.jsx";
+import { useSaved } from "../useSaved.js";
 import Tilt3D from "../Tilt3D.jsx";
+
+const HEART = (saved) => (saved ? "♥" : "♡");
 
 export default function Discover() {
   const { listings, data } = useStore();
   const navigate = useNavigate();
+  const { isSaved, toggle } = useSaved();
   const [query, setQuery] = useState("");
 
-  const featured = listings.slice(0, 8);
-  const spotlight = featured[1] || featured[0];
-  const tags = data.tags.slice(0, 8);
-  const quickTags = ["Music Video", "Podcast", "Photo Studios", "Rooftop"].filter((tag) =>
-    data.tags.includes(tag)
-  );
-  const lowestPrice = listings.reduce((min, item) => Math.min(min, Number(item.price) || min), Infinity);
+  const hero = listings[0];
+  const quickTags = data.tags.slice(0, 10);
+
+  // Rails are built from real data (tags + location). Only rails with enough
+  // listings render, so the home never shows an empty or broken section.
+  const rails = useMemo(() => {
+    const byTag = (...tags) => {
+      const seen = new Set();
+      const out = [];
+      for (const item of listings) {
+        if (item.id === hero?.id) continue;
+        if (tags.some((t) => item.tags?.includes(t)) && !seen.has(item.id)) {
+          seen.add(item.id);
+          out.push(item);
+        }
+      }
+      return out;
+    };
+    const candidates = [
+      { key: "near", title: "Near Atlanta", items: listings.filter((l) => (l.city || "").includes("Atlanta") && l.id !== hero?.id) },
+      { key: "studios", title: "Photo & film studios", items: byTag("Photo Studios", "Studio Shoot", "Film Shoot") },
+      { key: "podcast", title: "Podcast & interviews", items: byTag("Podcast", "Interview Shoot") },
+      { key: "rooftop", title: "Rooftops & views", items: byTag("Rooftop") },
+      { key: "events", title: "Events & gatherings", items: byTag("Wedding Halls", "Birthday Party", "Backyard") },
+    ];
+    return candidates
+      .map((r) => ({ ...r, items: r.items.slice(0, 8) }))
+      .filter((r) => r.items.length >= 2);
+  }, [listings, hero?.id]);
 
   const submit = (e) => {
     e.preventDefault();
     navigate(query.trim() ? `/explore?q=${encodeURIComponent(query.trim())}` : "/explore");
   };
 
+  const openSaved = (e, id) => {
+    e.stopPropagation();
+    toggle(id);
+  };
+
   return (
-    <div className="m-screen m-discover m-discover--refined">
-      <motion.header
-        className="m-home-head"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: EASE }}
-      >
-        <div className="m-home-brand">
-          <span className="m-home-brand__mark">P</span>
-          <div>
-            <strong>Phrazs</strong>
-            <span>Creative spaces</span>
+    <div className="m-screen m-discover m-home2">
+      {hero && (
+        <motion.section
+          className="m-hero2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, ease: EASE }}
+        >
+          <img className="m-hero2__img" src={hero.image} alt={hero.title} />
+          <span className="m-hero2__veil" aria-hidden="true" />
+
+          <div className="m-hero2__top">
+            <span className="m-hero2__brand">
+              <span className="m-hero2__mark">P</span>
+              Phrazs
+            </span>
+            <button type="button" className="m-hero2__explore" onClick={() => navigate("/explore")}>
+              Explore
+            </button>
           </div>
-        </div>
-        <button type="button" className="m-home-head__action" onClick={() => navigate("/explore")}>Explore</button>
-      </motion.header>
 
-      <motion.section
-        className="m-home-intro"
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.56, ease: EASE, delay: 0.04 }}
-      >
-        <p className="m-eyebrow">Book by the hour</p>
-        <h1>Find sets, studios, and scenes.</h1>
-        <p>Production-ready homes, studios, rooftops, and rooms curated for shoots and events.</p>
-      </motion.section>
+          <button
+            type="button"
+            className="m-hero2__feature"
+            onClick={() => navigate(`/listing/${hero.id}`)}
+            aria-label={`Open ${hero.title}`}
+          >
+            <span className="m-hero2__tag">Featured space</span>
+            <strong>{hero.title}</strong>
+            <span className="m-hero2__meta">
+              {hero.city || "Atlanta, GA"} · <em>{hero.priceLabel}/hr</em>
+            </span>
+          </button>
+        </motion.section>
+      )}
 
-      <form className="m-searchbar m-searchbar--home" onSubmit={submit}>
+      <form className="m-searchbar m-searchbar--float" onSubmit={submit}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
           <circle cx="11" cy="11" r="7" />
           <path d="M21 21l-4.3-4.3" />
@@ -67,61 +105,61 @@ export default function Discover() {
         <button type="submit" aria-label="Search">Go</button>
       </form>
 
-      <div className="m-quickrail" aria-label="Popular searches">
-        {quickTags.map((tag) => (
-          <button key={tag} type="button" onClick={() => navigate(`/explore?q=${encodeURIComponent(tag)}`)}>
-            {tag}
-          </button>
-        ))}
-      </div>
-
-      {spotlight && (
-        <motion.button
-          type="button"
-          className="m-feature-card"
-          onClick={() => navigate(`/listing/${spotlight.id}`)}
-          aria-label={`Open ${spotlight.title}`}
-          initial={{ opacity: 0, y: 16, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.58, ease: EASE, delay: 0.08 }}
-        >
-          <img src={spotlight.image} alt={spotlight.title} />
-          <span className="m-feature-card__veil" />
-          <span className="m-feature-card__tag">Featured space</span>
-          <span className="m-feature-card__body">
-            <span>{spotlight.category} in {spotlight.city || "Atlanta"}</span>
-            <strong>{spotlight.title}</strong>
-          </span>
-          <span className="m-feature-card__price">{spotlight.priceLabel}</span>
-        </motion.button>
-      )}
-
-      <div className="m-home-proof" aria-label="Marketplace highlights">
-        <span><strong>{listings.length}</strong> spaces</span>
-        <span><strong>{data.categories.length}</strong> categories</span>
-        <span><strong>${Number.isFinite(lowestPrice) ? lowestPrice : 50}+</strong> starting</span>
-      </div>
-
-      <section className="m-block">
-        <div className="m-block__head">
-          <h2>Today's edit</h2>
-          <span className="m-hint">swipe</span>
-        </div>
-        <SwipeDeck items={featured} onOpen={(it) => navigate(`/listing/${it.id}`)} />
-      </section>
-
-      <section className="m-block">
+      <section className="m-block m-block--tight">
         <div className="m-block__head">
           <h2>Browse by vibe</h2>
         </div>
-        <div className="m-chips">
-          {tags.map((tag) => (
+        <div className="m-chips m-chips--scroll">
+          {quickTags.map((tag) => (
             <button key={tag} type="button" onClick={() => navigate(`/explore?q=${encodeURIComponent(tag)}`)}>
               {tag}
             </button>
           ))}
         </div>
       </section>
+
+      {rails.map((rail) => (
+        <section className="m-block" key={rail.key}>
+          <div className="m-block__head">
+            <h2>{rail.title}</h2>
+            <button type="button" className="m-textlink" onClick={() => navigate("/explore")}>
+              See all
+            </button>
+          </div>
+          <div className="m-rail">
+            {rail.items.map((it) => {
+              const saved = isSaved(it.id);
+              return (
+                <div
+                  key={it.id}
+                  className="m-rail__card"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/listing/${it.id}`)}
+                  onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && navigate(`/listing/${it.id}`)}
+                >
+                  <div className="m-rail__media">
+                    <img src={it.image} alt={it.title} loading="lazy" />
+                    <button
+                      type="button"
+                      className={`m-rail__heart ${saved ? "is-saved" : ""}`}
+                      onClick={(e) => openSaved(e, it.id)}
+                      aria-label={saved ? "Remove from saved" : "Save space"}
+                    >
+                      {HEART(saved)}
+                    </button>
+                  </div>
+                  <div className="m-rail__body">
+                    <strong>{it.title}</strong>
+                    <span className="m-rail__loc">{it.city || "Atlanta, GA"}</span>
+                    <span className="m-rail__price">{it.priceLabel} <em>/hr</em></span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ))}
 
       <section className="m-block">
         <div className="m-block__head">

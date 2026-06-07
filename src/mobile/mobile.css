@@ -1507,3 +1507,251 @@
     font-size: 1.68rem;
   }
 }
+
+/* ============================================================
+   Immersive photo-hero home (.m-home2)
+   Full-bleed featured photo with a floating search bar, then
+   horizontal listing rails. Replaces the landing-page layout
+   with something that reads like a native app home.
+   ============================================================ */
+/* --gut is the single source of truth for the home's side gutter. The hero,
+   chip rail and listing rails all bleed by exactly this much and re-pad by it,
+   so full-bleed stays pixel-aligned no matter what the phone sets the padding
+   to (see the short-phone override below). */
+.m-screen.m-home2 {
+  --gut: 18px;
+  padding-top: 0;
+  padding-left: var(--gut);
+  padding-right: var(--gut);
+  background:
+    linear-gradient(180deg, rgba(247, 242, 233, 0) 60dvh, var(--paper) 60dvh);
+}
+
+/* ---- Hero ---- */
+.m-hero2 {
+  position: relative;
+  margin: 0 calc(-1 * var(--gut));   /* bleed to the screen edges */
+  /* Fluid: scales with the viewport instead of snapping at a breakpoint.
+     Clamped so it never dominates a small screen or floats on a tall one. */
+  height: clamp(380px, 60dvh, 560px);
+  overflow: hidden;
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 26px 54px -34px rgba(24, 21, 17, 0.7);
+}
+
+.m-hero2__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.m-hero2__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(12, 10, 7, 0.9) 2%, rgba(12, 10, 7, 0.28) 38%, rgba(12, 10, 7, 0) 62%),
+    linear-gradient(to bottom, rgba(12, 10, 7, 0.45), transparent 26%);
+}
+
+.m-hero2__top {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  left: 18px;
+  right: 18px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.m-hero2__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #fff;
+  font-family: var(--display);
+  font-size: 1.18rem;
+  font-weight: 600;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.m-hero2__mark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  font-size: 1.04rem;
+}
+
+.m-hero2__explore {
+  height: 38px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+.m-hero2__explore:active { transform: scale(0.94); }
+
+.m-hero2__feature {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 64px;            /* leave room for the floating search to overlap */
+  z-index: 2;
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.m-hero2__tag {
+  justify-self: start;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.m-hero2__feature strong {
+  display: -webkit-box;
+  overflow: hidden;
+  max-width: 16ch;
+  color: #fff;
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 6.2vw, 2.1rem);   /* scales with screen width */
+  font-weight: 600;
+  line-height: 1.02;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
+}
+
+.m-hero2__meta {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.m-hero2__meta em { color: #f0b75a; font-style: normal; font-weight: 800; }
+
+/* ---- Floating search overlapping the hero base ---- */
+.m-searchbar--float {
+  position: relative;
+  z-index: 6;
+  margin: -28px 4px 0;
+  padding: 8px 8px 8px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.96);
+  backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow: 0 22px 44px -22px rgba(24, 21, 17, 0.6);
+}
+
+.m-searchbar--float input { font-size: 0.98rem; }
+
+.m-searchbar--float button[type="submit"] {
+  width: auto;
+  min-width: 50px;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 13px;
+  background: var(--accent-dark);
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+/* ---- Blocks / rails on the immersive home ---- */
+.m-home2 .m-block { margin-top: 26px; }
+.m-home2 .m-block--tight { margin-top: 20px; }
+.m-home2 .m-block__head h2 { font-size: 1.34rem; }
+
+.m-home2 .m-chips--scroll { margin: 0 calc(-1 * var(--gut)); padding: 2px var(--gut) 4px; gap: 9px; }
+
+.m-home2 .m-rail { margin: 0 calc(-1 * var(--gut)); padding: 6px var(--gut) 12px; gap: 14px; }
+
+.m-home2 .m-rail__card {
+  /* 72% of the viewport, but never absurdly narrow or wide on tiny/large phones */
+  width: clamp(200px, 72vw, 248px);
+  border: 1px solid var(--line);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, box-shadow 0.2s ease;
+}
+.m-home2 .m-rail__card:active { transform: scale(0.97); }
+
+.m-rail__media { position: relative; }
+.m-home2 .m-rail__card .m-rail__media img { height: 150px; }
+
+.m-rail__heart {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(16, 14, 10, 0.4);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.2s ease;
+}
+.m-rail__heart.is-saved { color: #ff5a6e; }
+.m-rail__heart:active { transform: scale(0.85); }
+
+.m-home2 .m-rail__body { gap: 4px; padding: 12px 14px 14px; }
+.m-home2 .m-rail__body strong {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.98rem;
+  line-height: 1.18;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+.m-rail__loc { color: var(--muted); font-size: 0.8rem; font-weight: 500; }
+.m-rail__price { color: var(--accent-dark); font-size: 0.9rem; font-weight: 800; }
+.m-rail__price em { color: var(--muted); font-style: normal; font-weight: 500; }
+
+/* Narrow phones: slightly tighter gutter for more content width. The hero,
+   chips and rails all follow --gut, so the full-bleed stays aligned. */
+@media (max-width: 374px) {
+  .m-screen.m-home2 { --gut: 16px; }
+  .m-hero2__feature { left: 16px; right: 16px; }
+}
+
+/* Short phones: the hero already shrinks via clamp(); just tuck the floating
+   search a touch higher so the rails clear the fixed tab bar comfortably. */
+@media (max-height: 700px) {
+  .m-searchbar--float { margin-top: -24px; }
+  .m-hero2__feature { bottom: 56px; }
+}
+
+/* Foldables / large phones in landscape-ish widths: cap the hero so a single
+   photo doesn't swallow the whole viewport, and widen the reading column. */
+@media (min-width: 600px) {
+  .m-hero2 { height: clamp(420px, 52dvh, 600px); }
+  .m-hero2__feature strong { max-width: 22ch; }
+}
