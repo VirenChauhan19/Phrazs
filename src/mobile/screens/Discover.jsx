@@ -17,9 +17,7 @@ export default function Discover() {
   const quickTags = ["Music Video", "Podcast", "Photo Studios", "Rooftop"].filter((tag) =>
     data.tags.includes(tag)
   );
-  const avgPrice = Math.round(
-    listings.reduce((sum, item) => sum + (Number(item.price) || 0), 0) / Math.max(listings.length, 1)
-  );
+  const lowestPrice = listings.reduce((min, item) => Math.min(min, Number(item.price) || min), Infinity);
 
   const submit = (e) => {
     e.preventDefault();
@@ -27,68 +25,32 @@ export default function Discover() {
   };
 
   return (
-    <div className="m-screen m-discover">
+    <div className="m-screen m-discover m-discover--refined">
       <motion.header
         className="m-home-head"
-        initial={{ opacity: 0, y: 14 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: EASE }}
+        transition={{ duration: 0.5, ease: EASE }}
       >
         <div className="m-home-brand">
           <span className="m-home-brand__mark">P</span>
           <div>
             <strong>Phrazs</strong>
-            <span>Atlanta and beyond</span>
+            <span>Creative spaces</span>
           </div>
         </div>
-        <button type="button" className="m-home-head__action" onClick={() => navigate("/explore")}>Map</button>
+        <button type="button" className="m-home-head__action" onClick={() => navigate("/explore")}>Explore</button>
       </motion.header>
 
       <motion.section
-        className="m-home-hero"
-        initial={{ opacity: 0, y: 18, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.64, ease: EASE, delay: 0.06 }}
+        className="m-home-intro"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.56, ease: EASE, delay: 0.04 }}
       >
-        <div className="m-home-hero__copy">
-          <p className="m-eyebrow">Creative locations</p>
-          <h1>
-            Book a space that already feels like a <em>scene</em>.
-          </h1>
-          <p>Studios, homes, rooftops, and ready-to-shoot rooms for your next production.</p>
-        </div>
-
-        {spotlight && (
-          <button
-            type="button"
-            className="m-spotlight"
-            onClick={() => navigate(`/listing/${spotlight.id}`)}
-            aria-label={`Open ${spotlight.title}`}
-          >
-            <img src={spotlight.image} alt={spotlight.title} />
-            <span className="m-spotlight__veil" />
-            <span className="m-spotlight__body">
-              <span>{spotlight.category}</span>
-              <strong>{spotlight.title}</strong>
-              <em>{spotlight.priceLabel}</em>
-            </span>
-          </button>
-        )}
-
-        <div className="m-home-stats" aria-label="Marketplace highlights">
-          <span>
-            <strong>{listings.length}</strong>
-            spaces
-          </span>
-          <span>
-            <strong>{data.categories.length}</strong>
-            vibes
-          </span>
-          <span>
-            <strong>${avgPrice}</strong>
-            avg
-          </span>
-        </div>
+        <p className="m-eyebrow">Book by the hour</p>
+        <h1>Find sets, studios, and scenes.</h1>
+        <p>Production-ready homes, studios, rooftops, and rooms curated for shoots and events.</p>
       </motion.section>
 
       <form className="m-searchbar m-searchbar--home" onSubmit={submit}>
@@ -98,7 +60,7 @@ export default function Discover() {
         </svg>
         <input
           type="search"
-          placeholder="Studio, rooftop, kitchen..."
+          placeholder="Search studios, rooftops, kitchens"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -111,6 +73,33 @@ export default function Discover() {
             {tag}
           </button>
         ))}
+      </div>
+
+      {spotlight && (
+        <motion.button
+          type="button"
+          className="m-feature-card"
+          onClick={() => navigate(`/listing/${spotlight.id}`)}
+          aria-label={`Open ${spotlight.title}`}
+          initial={{ opacity: 0, y: 16, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.58, ease: EASE, delay: 0.08 }}
+        >
+          <img src={spotlight.image} alt={spotlight.title} />
+          <span className="m-feature-card__veil" />
+          <span className="m-feature-card__tag">Featured space</span>
+          <span className="m-feature-card__body">
+            <span>{spotlight.category} in {spotlight.city || "Atlanta"}</span>
+            <strong>{spotlight.title}</strong>
+          </span>
+          <span className="m-feature-card__price">{spotlight.priceLabel}</span>
+        </motion.button>
+      )}
+
+      <div className="m-home-proof" aria-label="Marketplace highlights">
+        <span><strong>{listings.length}</strong> spaces</span>
+        <span><strong>{data.categories.length}</strong> categories</span>
+        <span><strong>${Number.isFinite(lowestPrice) ? lowestPrice : 50}+</strong> starting</span>
       </div>
 
       <section className="m-block">
